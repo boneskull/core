@@ -1,0 +1,58 @@
+#!/usr/bin/env node
+
+var
+	program = require('commander'),
+	pkg = require('../package.json');
+
+program
+	.version(pkg.version);
+
+
+program
+	.command('generate [type] [name]')
+	.description('Generate models, controllers and scaffold depending on your project settings')
+	.action(function(type, name){
+		require('./generate')(program, type, name);
+ 	}).on('--help', function(){
+		console.log('    $ sx generate model User name:string email:string');
+		console.log('    $ sx generate controller User');
+		console.log('    $ sx generate scaffold User');
+	});
+
+program
+	.command('new <name>')
+	.description('Create a new Socket Express app')
+	.option('-c, --coffee', 'Set to output Coffeescript for generators', true)
+	.option('-f, --frontend <type>', 'Set front-end type, can be ember, angular', 'angular')
+	.option('-s, --style <type>', 'Set CSS type, can be one or more stylus, sass, less', 'stylus')
+	.option('-d, --database <type>', 'Set Database type, can be one or more mysql, sqlite, mongodb, couchdb, firebird, postgres, redis', 'mongodb')
+	.option('--html <type>', 'Set HTML framework, can be h5bp, foundation, bootstrap, groundwork', 'groundwork')
+	.action(function(name, options){
+		console.log('[*] Generating Socket Express application structure...');
+		console.log('[*] Done!');
+	});
+
+
+program.on('--help', function(){
+	console.log('  Examples:');
+	console.log('');
+	console.log('    $ sx init app');
+	console.log('    $ sx init app --coffee --frontend ember');
+	console.log('    $ sx init app -f angular -d couchdb');
+	console.log('    $ sx init app --coffee --frontend ember');
+	console.log('');
+	console.log('    $ sx generate model User name:string email:string');
+	console.log('    $ sx generate controller User');
+	console.log('    $ sx generate scaffold User');
+	console.log('');
+});
+
+program.on('*', function(){
+  program.help();
+});
+
+program.parse(process.argv);
+
+if (process.argv.length < 3) {
+	program.help();
+} 

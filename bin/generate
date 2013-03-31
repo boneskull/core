@@ -1,0 +1,3 @@
+module.exports = function(program, type, name){
+	console.log(program.args);
+}
