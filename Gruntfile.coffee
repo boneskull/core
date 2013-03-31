@@ -7,7 +7,7 @@ module.exports = (grunt) ->
     release:
       options:
         bump: false
-        
+
     karma:
       unit:
         configFile: 'test/karma.conf.js'
