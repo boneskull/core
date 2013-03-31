@@ -43,8 +43,9 @@
 		"coffee-script": ">=1.6.2",
 		"karma": ">=0.9.0",
 		"karma-coverage": ">=0.0.1",
+		"karma-mocha": ">=0.0.1",
 		"grunt-release": "0.3.2",
-		"grunt-karma": ">=0.3.2"
+		"grunt-karma": ">=0.3.0"
 	},
 	"optionalDependencies": {
 		"nginx-conf": "0.1.0",
