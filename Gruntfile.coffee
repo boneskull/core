@@ -10,14 +10,15 @@ module.exports = (grunt) ->
 
     karma:
       unit:
-        configFile: 'test/karma.conf.js'
-      continuous:
-        configFile: 'test/karma.conf.js'
+        browsers: ['Firefox']
         singleRun: true
-        browsers: ['PhantomJS', 'Firefox']
+      continuous:
+        browsers: ['PhantomJS']
+        singleRun: false
 
   grunt.loadNpmTasks 'grunt-release'
   grunt.loadNpmTasks 'grunt-karma'
 
-  grunt.registerTask 'test', ['karma:unit', 'karma:continuous']
+  grunt.registerTask 'test', ['karma:unit']
+  grunt.registerTask 'test:continuous', ['karma:continuous']
   grunt.registerTask 'default'
