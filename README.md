@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/pocesar/node-socketexpress.png?branch=develop)](https://travis-ci.org/pocesar/node-socketexpress)
+
 Socket Express
 =============
 

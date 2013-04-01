@@ -9,6 +9,8 @@ module.exports = (grunt) ->
         bump: false
 
     karma:
+      options:
+        configFile: 'karma.conf.js'
       unit:
         browsers: ['Firefox']
         singleRun: true
