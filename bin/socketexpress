@@ -13,7 +13,7 @@ program
 	.description('Generate models, controllers and scaffold depending on your project settings')
 	.action(function(type, name){
 		require('./generate')(program, type, name);
- 	}).on('--help', function(){
+	}).on('--help', function(){
 		console.log('    $ sx generate model User name:string email:string');
 		console.log('    $ sx generate controller User');
 		console.log('    $ sx generate scaffold User');
@@ -23,9 +23,10 @@ program
 	.command('new <name>')
 	.description('Create a new Socket Express app')
 	.option('-c, --coffee', 'Set to output Coffeescript for generators', true)
-	.option('-f, --frontend <type>', 'Set front-end type, can be ember, angular', 'angular')
-	.option('-s, --style <type>', 'Set CSS type, can be one or more stylus, sass, less', 'stylus')
-	.option('-d, --database <type>', 'Set Database type, can be one or more mysql, sqlite, mongodb, couchdb, firebird, postgres, redis', 'mongodb')
+	.option('-f, --frontend <type>', 'Set front-end type, separate by commas, can be ember, angular', 'angular')
+	.option('-s, --style <type>', 'Set CSS type, can be one or more, separate by commas, stylus, sass, less', 'stylus')
+	.option('-d, --database <type>', 'Set database type, can be one or more, separate by commas, mysql, sqlite, mongodb, couchdb, firebird, postgres, redis', 'mongodb')
+	.option('-t, --test <type>', 'Set testing framework, can be one of the following mocha, jasmine, qunit', 'mocha')
 	.option('--html <type>', 'Set HTML framework, can be h5bp, foundation, bootstrap, groundwork', 'groundwork')
 	.action(function(name, options){
 		console.log('[*] Generating Socket Express application structure...');
@@ -55,4 +56,4 @@ program.parse(process.argv);
 
 if (process.argv.length < 3) {
 	program.help();
-} 
+}
