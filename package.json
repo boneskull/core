@@ -38,22 +38,22 @@
 		"jsface": ">=2.1.1",
 		"commander": ">=1.1.1",
 		"i18n-2": ">=0.4.4",
-		"slugg": "*"
+		"slugg": "*",
+		"trycatch": "~0.2.0",
+		"toobusy": ">=0.2.3"
 	},
 	"devDependencies": {
 		"mocha": ">=1.8.2",
 		"chai": ">=1.5.0",
 		"coffee-script": ">=1.6.2",
-		"karma": ">=0.9.0",
 		"grunt": "~0.4.0",
 		"grunt-cli": ">=0.1.7",
-		"karma-coverage": "*",
-		"karma-mocha": "*",
-		"grunt-release": "0.3.2",
-		"grunt-karma": ">=0.3.0"
+		"grunt-karma": "*",
+		"grunt-release": ">=0.3.2",
+		"karma-mocha": "*"
 	},
 	"optionalDependencies": {
-		"nginx-conf": "0.1.0",
+		"nginx-conf": ">=0.1.0",
 		"spdy": ">=1.5.0"
 	},
 	"scripts": {
