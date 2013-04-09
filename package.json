@@ -40,17 +40,19 @@
 		"i18n-2": ">=0.4.4",
 		"slugg": "*",
 		"trycatch": "~0.2.0 || ~0.1.0",
-		"toobusy": ">=0.2.3"
+		"toobusy": ">=0.2.3",
+		"hashids": "*"
 	},
 	"devDependencies": {
-		"mocha": ">=1.8.2",
+		"mocha": ">=1.9.0",
 		"chai": ">=1.5.0",
 		"coffee-script": ">=1.6.2",
 		"grunt": "~0.4.0",
 		"grunt-cli": ">=0.1.7",
 		"grunt-karma": "*",
 		"grunt-release": ">=0.3.2",
-		"karma-mocha": "*"
+		"karma-mocha": "*",
+		"memwatch": "*"
 	},
 	"optionalDependencies": {
 		"nginx-conf": ">=0.1.0",
