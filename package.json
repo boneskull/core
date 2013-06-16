@@ -1,68 +1,80 @@
 {
-	"name": "socket-express",
-	"version": "0.0.2",
-	"author": "Paulo Cesar",
-	"homepage": "http://socketexpress.net",
-	"description": "When realtime and stateless HTTP together, live happily ever after. HMVC framework built on top of SocketStream and Express.js for Node.js, inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone for Node for you)",
-	"keywords": [
-		"HMVC", "MVC", "framework", "realtime",
-		"express", "socketstream", "fullstack",
-		"spdy", "orm", "model", "controller",
-		"sockets", "HTTP", "ajax"
-	],
-	"preferGlobal": true,
-	"engines": { "node" : "~0.8.0 || ~0.10.0 || ~0.11.0" },
-	"license": "MIT",
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/pocesar/node-socketexpress"
-	},
-	"dependencies": {
-		"socketstream": "~0.3.0",
-		"express": ">=3.1.0",
-		"express-expose": ">=0.3.3",
-		"jugglingdb": ">=0.2.0",
-		"transformers": ">=2.0.0",
-		"async": ">=0.2.6",
-		"formidable": ">=1.0.13",
-		"moment": ">=2.0.0",
-		"validator": ">=0.4.28",
-		"express-validator": ">=0.3.2",
-		"accounting": ">=0.3.2",
-		"gm": ">=1.8.2",
-		"passport": ">=0.1.16",
-		"nodemailer": ">=0.4.1",
-		"winston": ">=0.6.2",
-		"uglify-js": ">=2.2.5",
-		"URIjs": ">=1.10.0",
-		"jsface": ">=2.1.1",
-		"commander": ">=1.1.1",
-		"i18n-2": ">=0.4.4",
-		"slugg": "*",
-		"trycatch": "~0.2.0 || ~0.1.0",
-		"toobusy": ">=0.2.3",
-		"hashids": "*"
-	},
-	"devDependencies": {
-		"mocha": ">=1.9.0",
-		"chai": ">=1.5.0",
-		"coffee-script": ">=1.6.2",
-		"grunt": "~0.4.0",
-		"grunt-cli": ">=0.1.7",
-		"grunt-karma": "*",
-		"grunt-release": ">=0.3.2",
-		"karma-mocha": "*",
-		"memwatch": "*"
-	},
-	"optionalDependencies": {
-		"nginx-conf": ">=0.1.0",
-		"spdy": ">=1.5.0"
-	},
-	"scripts": {
-		"test": "grunt test"
-	},
-	"bin": {
-		"sx": "./bin/socketexpress",
-		"socketexpress": "./bin/socketexpress"
-	}
+  "name": "socket-express",
+  "version": null,
+  "author": "Paulo Cesar",
+  "homepage": "http://socketexpress.net",
+  "description": "When realtime and stateless HTTP together, live happily ever after. HMVC framework built on top of SocketStream and Express.js for Node.js, inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone for Node for you)",
+  "keywords": [
+    "HMVC",
+    "MVC",
+    "framework",
+    "realtime",
+    "express",
+    "socketstream",
+    "fullstack",
+    "spdy",
+    "orm",
+    "model",
+    "controller",
+    "sockets",
+    "HTTP",
+    "ajax"
+  ],
+  "preferGlobal": true,
+  "engines": {
+    "node": "~0.8.0 || ~0.10.0 || ~0.11.0"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pocesar/node-socketexpress"
+  },
+  "dependencies": {
+    "socketstream": "~0.3.0",
+    "express": ">=3.1.0",
+    "express-expose": ">=0.3.3",
+    "jugglingdb": ">=0.2.0",
+    "transformers": ">=2.0.0",
+    "async": ">=0.2.6",
+    "formidable": ">=1.0.13",
+    "moment": ">=2.0.0",
+    "validator": ">=0.4.28",
+    "express-validator": ">=0.3.2",
+    "accounting": ">=0.3.2",
+    "gm": ">=1.8.2",
+    "passport": ">=0.1.16",
+    "nodemailer": ">=0.4.1",
+    "winston": ">=0.6.2",
+    "uglify-js": ">=2.2.5",
+    "URIjs": ">=1.10.0",
+    "jsface": ">=2.1.1",
+    "commander": ">=1.1.1",
+    "i18n-2": ">=0.4.4",
+    "slugg": "*",
+    "trycatch": "~0.2.0 || ~0.1.0",
+    "toobusy": ">=0.2.3",
+    "hashids": "*"
+  },
+  "devDependencies": {
+    "mocha": ">=1.9.0",
+    "chai": ">=1.5.0",
+    "coffee-script": ">=1.6.2",
+    "grunt": "~0.4.0",
+    "grunt-cli": ">=0.1.7",
+    "grunt-karma": "*",
+    "grunt-release": ">=0.3.2",
+    "karma-mocha": "*",
+    "memwatch": "*"
+  },
+  "optionalDependencies": {
+    "nginx-conf": ">=0.1.0",
+    "spdy": ">=1.5.0"
+  },
+  "scripts": {
+    "test": "grunt test"
+  },
+  "bin": {
+    "sx": "./bin/socketexpress",
+    "socketexpress": "./bin/socketexpress"
+  }
 }
