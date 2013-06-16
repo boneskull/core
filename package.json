@@ -11,7 +11,7 @@
 		"sockets", "HTTP", "ajax"
 	],
 	"preferGlobal": true,
-	"engines": { "node" : "~0.8.0 || ~0.10.0" },
+	"engines": { "node" : "~0.8.0 || ~0.10.0 || ~0.11.0" },
 	"license": "MIT",
 	"repository": {
 		"type": "git",

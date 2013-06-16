@@ -10,12 +10,12 @@ module.exports = (grunt) ->
 
     karma:
       options:
-        configFile: 'karma.conf.js'
+        configFile: 'tests/karma.conf.js'
       unit:
         browsers: ['Firefox']
         singleRun: true
       continuous:
-        browsers: ['PhantomJS']
+        browsers: ['Firefox','Chrome']
         singleRun: false
 
   grunt.loadNpmTasks 'grunt-release'

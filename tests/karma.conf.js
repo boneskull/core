@@ -1,8 +1,8 @@
 files = [
 	MOCHA,
 	MOCHA_ADAPTER,
-	'node_modules/chai/chai.js',
-	'test/*.coffee'
+	'../node_modules/chai/chai.js',
+	'./**/*.spec.coffee'
 ];
 reporters = ['dots'];
 preprocessors = {
