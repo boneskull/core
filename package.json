@@ -1,6 +1,6 @@
 {
   "name": "socket-express",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "author": "Paulo Cesar",
   "homepage": "http://socketexpress.net",
   "description": "When realtime and stateless HTTP together, live happily ever after. HMVC framework built on top of SocketStream and Express.js for Node.js, inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone for Node for you)",
@@ -60,6 +60,7 @@
     "chai": ">=1.5.0",
     "coffee-script": ">=1.6.2",
     "grunt": "~0.4.0",
+    "grunt-cli": "~0.4.0",
     "grunt-karma": "*",
     "grunt-release": ">=0.3.2",
     "memwatch": "*"
