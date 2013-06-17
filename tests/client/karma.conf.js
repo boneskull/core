@@ -1,14 +1,14 @@
 files = [
 	MOCHA,
 	MOCHA_ADAPTER,
-	'../node_modules/chai/chai.js',
-	'./**/*.spec.coffee'
+	'../../node_modules/chai/chai.js',
+	'**/*.spec.coffee'
 ];
 reporters = ['dots'];
 preprocessors = {
-	'**/*.coffee': 'coffee'
+	'**/*.spec.coffee': 'coffee'
 };
 coverageReporter = {
 	type: 'html',
-	dir: 'coverage/'
+	dir: '../coverage/'
 };

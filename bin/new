@@ -1,0 +1,12 @@
+module.exports = function(program, name, options){
+  var fs = require('fs-extra'),
+      path = require('path'),
+      cwd = process.cwd(),
+      app = path.normalize(cwd + '/' + name),
+      src = path.normalize(__dirname + '/structure');
+  
+  fs.copy(src, app, function(){
+    //var template = require('./structure/package.json');
+    console.log('[*] Done');
+  });
+};

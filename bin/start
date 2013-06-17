@@ -1,0 +1,15 @@
+module.exports = function(){
+  var cwd = process.cwd(), index = cwd + '/index.js', fs = require('fs');
+
+  if (fs.existsSync(index) && fs.existsSync(cwd + '/package.json')) {
+    var pkg = require(cwd + '/package.json');
+    if (typeof pkg.dependencies !== 'undefined' && typeof pkg.dependencies['socket-express'] !== 'undefined') {
+      console.log('[*] Starting SX server');
+      require(index);
+    } else {
+      console.log("[*] Missing 'socket-express' dependency, did this folder was created using 'sx new app'?");
+    }
+  } else {
+    console.log("[*] No SX server found, aborting... Did you do a 'sx new' command before?\n    This command should be run on your top level SX app folder");
+  }
+};

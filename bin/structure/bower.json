@@ -1,0 +1,12 @@
+{
+  "name"   : "",
+  "version": "0.0.1",
+  "directory": "public",
+  "ignore" : [
+    "**/.*",
+    "node_modules",
+    "public",
+    "components"
+  ],
+  "dependencies": {}
+}

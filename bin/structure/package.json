@@ -1,0 +1,10 @@
+{
+  "name"                : "SX app",
+  "version"             : "0.0.1",
+  "description"         : "My first SX app",
+  "engines"             : {
+    "node": "~0.8.0 || ~0.10.0 || ~0.11.0"
+  },
+  "dependencies"        : {},
+  "devDependencies"     : {}
+}
