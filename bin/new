@@ -1,12 +1,213 @@
 module.exports = function(program, name, options){
   var fs = require('fs-extra'),
       path = require('path'),
+      dir = __dirname,
       cwd = process.cwd(),
-      app = path.normalize(cwd + '/' + name),
-      src = path.normalize(__dirname + '/structure');
+      n = path.normalize,
+      app = n(cwd + '/' + name),
+      src = n(dir + '/structure');
   
-  fs.copy(src, app, function(){
-    //var template = require('./structure/package.json');
-    console.log('[*] Done');
+  fs.copy(src, app, function(err){
+    if (err) {
+      throw err;
+    }
+    
+    console.log('[*] Structure created, copying system'.cyan);
+    
+    /* copy the current version lib to the target directory */
+    fs.copy(n(dir + '/../lib/'), app, function(err){
+      if (err) {
+        throw err;
+      }
+      
+      console.log('[*] Adjusting bower and npm dependencies'.cyan);
+      
+      var pkgPath = n(app + '/package.json'),
+          pkg = fs.readJsonFileSync(pkgPath),
+          bowerPath = n(app + '/bower.json'),
+          bower = fs.readJsonFileSync(bowerPath),
+          originalPath = n(dir + '/../package.json'),
+          bootstrap,
+          original = fs.readJsonFileSync(originalPath),
+          version;
+      
+      pkg.dependencies = original.dependencies;
+      
+      bootstrap = {
+        database: '',
+        style: []
+      };
+      
+      version = '*';
+      
+      options.frontend.forEach(function(frontend) {
+        switch (frontend.toLowerCase()) {
+          case 'ember':
+            name = 'ember.js';
+            break;
+          case 'angular':
+            name = 'angular-latest';
+            break;
+          case 'backbone':
+            name = 'backbone';
+            break;
+          case 'knockback':
+            name = 'knockback';
+            break;
+          case 'marionette':
+            name = 'marionette';
+            break;
+          case 'jquery':
+            name = 'jquery';
+            break;
+          default: 
+            name = false;
+            break;
+        }
+        
+        if (name) {
+          console.log(('[+] Front-end library "' + name + '"').green);
+          bower.dependencies[name] = version;
+        }
+      });
+      
+      
+      version = '*';
+      
+      switch (options.html.toLowerCase()){
+        case 'bootstrap':
+          name = 'bootstrap';
+          break;
+        case 'groundwork':
+          name = 'groundwork';
+          break;
+        case 'foundation':
+          name = 'foundation';
+          break;
+        default:
+          name = false;
+          break;
+      }
+      
+      if (name) {
+        console.log(('[+] HTML "' + name + '"').green);
+        bower.dependencies[name] = version;
+      }
+
+      version = '*';
+      
+      switch (options.database.toLowerCase()) {
+        case 'firebird':
+          name = 'firebird';
+          break;
+        case 'mongodb':
+          name = 'mongodb';
+          break;
+        case 'mysql':
+          name = 'mysql';
+          break;
+        case 'couchdb':
+          name = 'couchdb';
+          break;
+        case 'postgresql':
+          name = 'postgresql';
+          break;
+        case 'redis':
+          name = 'redis';
+          break;
+        case 'sqlite':
+          name = 'sqlite';
+          break;
+      }
+      
+      if (name) {
+        console.log(('[+] Database "' + name + '"').green);
+        bootstrap.database = name;
+      }
+
+      version = '*';
+      
+      switch (options.test.toLowerCase()) {
+        case 'mocha':
+          name = 'mocha';
+          break;
+        case 'jasmine':
+          name = 'jasmine';
+          break;
+        case 'qunit':
+          name = 'qunit';
+          break;
+        case 'vows':
+          name = 'vows';
+          break;
+      }
+      
+      if (name) {
+        console.log(('[+] Test framework "' + name + '"').green);
+        pkg.dependencies[name] = version;
+      }
+
+      options.style.forEach(function(style){
+        version = '*';
+        
+        switch (style.toLowerCase()) {
+          case 'less':
+            name = 'less';
+            break;
+          case 'stylus':
+            name = 'stylus';
+            break;
+          case 'sass':
+            name = 'sass';
+            break;
+        }
+        
+        if (name) {
+          console.log(('[+] Style "' + name + '"').green);
+          bootstrap.style.push(name);
+          pkg.dependencies[name] = version;
+        }
+      });
+      
+      /* write the new configuration files */
+      fs.writeJsonFileSync(bowerPath, bower);
+      fs.writeJsonFileSync(pkgPath, pkg);
+      fs.writeJsonFileSync(n(app + '/.sx'), bootstrap);
+      
+      /* auto install the dependencies */
+      var exec = require('child_process').exec;
+      
+      console.log('[!] Executing npm install'.cyan);
+      
+      var npm = exec('npm install', {cwd: app});
+      
+      npm.stdout.on('data', function(data){
+        console.log(data);
+      });
+      
+      npm.on('close', function(code){
+        if (code){
+          console.log('[-] Failed to npm install'.red);
+          return;
+        }
+        
+        console.log('[!] Executing bower install'.cyan);
+        
+        var bower = exec('bower install', {cwd: app});
+        
+        bower.stdout.on('data', function(data){
+          console.log(data);
+        });
+        
+        bower.on('close', function(code){
+          if (code) {
+            console.log('[-] Failed to bower install'.red);
+            return;
+          }
+          
+          console.log('[*] Done'.green);
+        });        
+      });
+    });
   });
 };

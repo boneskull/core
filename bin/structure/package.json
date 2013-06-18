@@ -1,5 +1,5 @@
 {
-  "name"                : "SX app",
+  "name"                : "sx-app",
   "version"             : "0.0.1",
   "description"         : "My first SX app",
   "engines"             : {

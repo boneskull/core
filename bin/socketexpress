@@ -2,7 +2,9 @@
 
 var
 	program = require('commander'),
-	pkg = require('../package.json');
+	pkg = require('../package.json'),
+  colors = require('colors')
+  ;
 
 program
 	.version(pkg.version);
@@ -13,22 +15,41 @@ program
 	.action(function(type, name){
 		require('./generate')(program, type, name);
 	}).on('--help', function(){
-		console.log('    $ sx generate model User name:string email:string');
-		console.log('    $ sx generate controller User');
-		console.log('    $ sx generate scaffold User');
+		console.log('    $ sx generate model User name:string email:string'.yellow);
+		console.log('    $ sx generate controller User'.yellow);
+		console.log('    $ sx generate scaffold User'.yellow);
 	});
+
+function list(val){
+  return val.split(',');
+}
+
+var
+  spacing = "\n\t\t\t   * ",
+  templates = ['atpl', 'coffeecup', 'dot', 'dust', 'eco', 'ect', 'ejs', 'haml', 'haml-coffee', 'handlebars', 'hogan', 'jade', 'jazz', 'jqtpl', 'JUST', 'liquor', 'mustache', 'QEJS', 'swig', 'templayed', 'toffee', 'underscore', 'walrus', 'whiskers'],
+  frontend = [ 'ember', 'angular', 'backbone', 'knockback', 'marionette'],
+  styles = ['stylus', 'sass', 'less'],
+  databases = ['Firebird','MongoDB','MySQL','CouchDB','PostgreSQL','Redis','SQLite'],
+  testing = ['mocha','jasmine','qunit','vows'],
+  html = ['foundation','bootstrap','groundwork']
+  ;
+
+function format(item){
+  return ("\n" + spacing + item.join(spacing) + "\n").yellow;
+}
 
 program
 	.command('new <name>')
 	.description('Create a new Socket Express app')
 	.option('-c, --coffee', 'Set to output Coffeescript for generators', true)
-	.option('-f, --frontend <type>', 'Set front-end type, separate by commas, can be ember, angular', 'angular')
-	.option('-s, --style <type>', 'Set CSS type, can be one or more, separate by commas, stylus, sass, less', 'stylus')
-	.option('-d, --database <type>', 'Set database type, can be one or more, separate by commas, mysql, sqlite, mongodb, couchdb, firebird, postgres, redis', 'mongodb')
-	.option('-t, --test <type>', 'Set testing framework, can be one of the following mocha, jasmine, qunit', 'mocha')
-	.option('--html <type>', 'Set HTML framework, can be h5bp, foundation, bootstrap, groundwork', 'groundwork')
+	.option('-t, --template <type>', "Set template types, separate by commas, can be one or more of:" + format(templates), list, ['jade'])
+	.option('-f, --frontend <type>', 'Set front-end type, separate by commas, can be one or more of:' + format(frontend), list, ['jquery','angular'])
+	.option('-s, --style <type>', 'Set CSS type, can be one or more, separate by commas' + format(styles), list, ['stylus'])
+	.option('-d, --database <type>', 'Set database type, can be:' + format(databases), 'mongodb')
+	.option('-t, --test <type>', 'Set testing framework, can be one of the following' + format(testing), 'mocha')
+	.option('--html <type>', 'Set HTML framework, can be' + format(html), 'bootstrap')
 	.action(function(name, options){
-		console.log('[*] Generating Socket Express application structure to "' + name + '"...');
+		console.log(('[*] Generating Socket Express application structure to "' + name + '"...').yellow);
     require('./new')(program, name, options);
 	});
 
@@ -44,14 +65,14 @@ program
 program.on('--help', function(){
 	console.log('  Examples:');
 	console.log('');
-	console.log('    $ sx init app');
-	console.log('    $ sx init app --coffee --frontend ember');
-	console.log('    $ sx init app -f angular -d couchdb');
-	console.log('    $ sx init app --coffee --frontend ember');
+	console.log('    $ sx init app'.yellow);
+	console.log('    $ sx init app --coffee --frontend ember'.yellow);
+	console.log('    $ sx init app -f angular -d couchdb'.yellow);
+	console.log('    $ sx init app --coffee --frontend ember'.yellow);
 	console.log('');
-	console.log('    $ sx generate model User name:string email:string');
-	console.log('    $ sx generate controller User');
-	console.log('    $ sx generate scaffold User');
+	console.log('    $ sx generate model User name:string email:string'.yellow);
+	console.log('    $ sx generate controller User'.yellow);
+	console.log('    $ sx generate scaffold User'.yellow);
 	console.log('');
 });
 

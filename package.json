@@ -67,7 +67,8 @@
     "grunt-contrib-coffee": "*",
     "grunt-release": ">=0.3.2",
     "memwatch": "*",
-    "grunt-cafe-mocha": "~0.1.6"
+    "grunt-cafe-mocha": "~0.1.6",
+    "colors": "~0.6.0-1"
   },
   "optionalDependencies": {
     "nginx-conf": ">=0.1.0",
