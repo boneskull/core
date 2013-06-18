@@ -10,4 +10,4 @@ trycatch.configure(
 
 global.sx = require('./system/classes/sx')
 
-sx.init(__dirname)
+sx.init(__dirname) 

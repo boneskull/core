@@ -23,11 +23,12 @@ module.exports = (grunt) ->
     watch:
       coffee:
         files: ['./src/**/*.coffee', './tests/**/*.spec.coffee']
-        tasks: ['coffee', 'cafemocha:test']
+        tasks: ['coffee', 'test']
 
     coffee:
       compile:
-        bare: true
+        options:
+          bare: true
         expand: true
         cwd   : 'src'
         src   : '**/*.coffee'
@@ -61,7 +62,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-cafe-mocha'
 
-  grunt.registerTask 'test', ['karma:unit']
+  grunt.registerTask 'test', ['cafemocha']
   grunt.registerTask 'test:continuous', ['karma:continuous']
 
   grunt.registerTask 'releaseit', release
