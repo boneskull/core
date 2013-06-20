@@ -41,7 +41,7 @@ function format(item){
 program
 	.command('new <name>')
 	.description('Create a new Socket Express app')
-	.option('-c, --coffee', 'Set to output Coffeescript for generators', true)
+	.option('-c, --coffee', 'Set to output Coffeescript for generators'.yellow, true)
 	.option('-t, --template <type>', "Set template types, separate by commas, can be one or more of:" + format(templates), list, ['jade'])
 	.option('-f, --frontend <type>', 'Set front-end type, separate by commas, can be one or more of:' + format(frontend), list, ['jquery','angular'])
 	.option('-s, --style <type>', 'Set CSS type, can be one or more, separate by commas' + format(styles), list, ['stylus'])
@@ -51,6 +51,15 @@ program
 	.action(function(name, options){
 		console.log(('[*] Generating Socket Express application structure to "' + name + '"...').yellow);
     require('./new')(program, name, options);
+	});
+
+program
+	.command('update')
+	.description('Update the current app to the latest SX version')
+	.option('-d, --dependencies', 'Update the dependencies as well', true)
+	.action(function(options){
+		console.log(('[*] Updating Socket Express application...').yellow);
+    require('./update')(program, options);
 	});
 
 program

@@ -1,0 +1,41 @@
+module.exports = function (program, options){
+  var 
+    fsextra = require('fs-extra'),
+    fs = require('fs'),
+    semver = require('semver'),
+    path = require('path'),
+    dir = __dirname,
+    cwd = process.cwd(),
+    n = path.normalize,
+    app = n(cwd),
+    src = n(dir + '/../lib'),
+    sx = cwd + '/.sx',
+    o = false,
+    i = false
+    ;
+  
+  try {
+    o = fsextra.readJsonFileSync(dir + '/../package.json');
+    i = fsextra.readJsonFileSync(sx);
+  } catch (e) {}
+
+  if (o && i) {
+    if (semver.compare(o.version, i.version) === 1) {
+      fsextra.copy(src, app, function (err){
+        if (err) {
+          throw err;
+        }
+
+        console.log('[+] Files copied'.green);
+
+        if (options.dependencies) {
+          
+        }
+      });
+    } else {
+      console.log('[~] Nothing to update');
+    }
+  } else {
+    console.log('[-] Failed to update, is this a Socket Express app?');
+  }
+};
