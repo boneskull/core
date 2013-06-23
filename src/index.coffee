@@ -1,13 +1,18 @@
 # try catch module needs to be before anything else
-global.trycatch = require 'trycatch'
+`trycatch = require('trycatch');`
 
-trycatch.configure(
-  'colors':
-    'node'        : 'none'
-    'node_modules': false
-    'default'     : 'yellow'
-)
+trycatch.configure
+  colors:
+    node        : 'none'
+    node_modules: false
+    default     : 'yellow'
 
-global.sx = require('./system/classes/sx')
+`path = require('path');`
+`fs = require('fs');`
+`Lazy = require('lazy.js');`
+`_ = require('lodash');`
+`postal = require('postal')(_);`
+`Class = require('es5class');`
+`_s = require('underscore.string');`
 
-sx.init(__dirname) 
+require(path.normalize(__dirname + '/system/classes/sx'))(__dirname)

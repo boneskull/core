@@ -4,3 +4,4 @@ ssl
 *~
 .idea
 npm-debug.log
+tests/lib-cov/*

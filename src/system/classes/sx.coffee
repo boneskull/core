@@ -1,35 +1,66 @@
-# common stuff
-fs = require 'fs'
-path = require 'path'
+Factory = require path.normalize(__dirname + '/factory')
 
-# needed globals
-Lazy = require 'lazy.js'
-jsface = require 'jsface'
+module.exports = (root) ->
+  
+  global.sx = sx = Class.extend('sx', {}, ->
+    
+    init = ->
+      factoryChannel = postal.channel 'Factory'
+      sxChannel = postal.channel 'sx'
 
-module.exports = sx = jsface.Class(->
-  loadModule = ->
+      sx.implement(
+        classes: {}
+        
+        modules: {}
+        
+        controllers: {}
+        
+        models: {}
+        
+        paths:
+          'system' : path.normalize(root + '/system/')
+          'app'    : path.normalize(root + '/app/')
+          'public' : path.normalize(root + '/public/')
+          'modules': path.normalize(root + '/modules/')
+        
+        events: 
+          create: postal
+          
+          channel: (name) ->
+            postal.channel name
+            
+          publish: (event, data) ->
+            sxChannel.publish event, data
+            
+          subscribe: (event, cb) ->
+            sxChannel.subscribe event, cb
+              
+          unsubscribe: (event) ->
+            subscribers = postal.utils.getSubscribersFor {channel: 'sx', topic: event}
+            
+            if subscribers?.length
+              subscriber.unsubscribe() for subscriber in subscribers
+      )
+      
+      factoryChannel.subscribe(
+        'class.created'
+        (data, envelope) ->
+          if data.class?
+            if data.class.$singleton is true
+              sx[data.name] = data.class
+              
+            sx.events.publish 'class.created', data
+      )
+      
+      sx.implement factory: Factory(sx.classes, factoryChannel)
+      
+      return
+    
+    {
+      init: init  
+    }
+  )
+  
+  sx.init()
 
-  loadClass = (className) ->
-    
-    
-  init = (root) ->
-    jsface.extend(sx, 
-      extend : jsface.extend
-      paths  :
-        'system' : path.normalize(root + '/system/')
-        'app'    : path.normalize(root + '/app/')
-        'public' : path.normalize(root + '/public/')
-        'modules': path.normalize(root + '/modules/')
-      modules: {}
-      factory: loadClass
-    )
-    
-    
-    
-    return
-
-  {
-    $singleton: true
-    init      : init
-  }
-)
+  

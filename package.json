@@ -17,6 +17,9 @@
     "model",
     "controller",
     "sockets",
+    "websocket",
+    "cascading",
+    "extend",
     "HTTP",
     "ajax"
   ],
@@ -29,8 +32,12 @@
     "type": "git",
     "url": "https://github.com/pocesar/node-socketexpress"
   },
+  "directories": {
+    "lib": "./lib"
+  },
   "dependencies": {
     "socketstream": "~0.3.0",
+    "cors": "*",
     "express": ">=3.1.0",
     "express-expose": ">=0.3.3",
     "jugglingdb": ">=0.2.0",
@@ -47,7 +54,7 @@
     "winston": ">=0.6.2",
     "uglify-js": ">=2.2.5",
     "URIjs": ">=1.10.0",
-    "jsface": ">=2.1.1",
+    "es5class": "*",
     "commander": ">=1.1.1",
     "i18n-2": ">=0.4.4",
     "slugg": "*",
@@ -57,7 +64,11 @@
     "hashids": "*",
     "fs-extra": "~0.6.1",
     "semver": "*",
-    "bower": "~0.9.2"
+    "bower": "~0.9.2",
+    "underscore.string": "*",
+    "lodash": "*",
+    "colors": "*",
+    "postal": "~0.8.4"
   },
   "devDependencies": {
     "chai": "*",
@@ -67,9 +78,11 @@
     "grunt-contrib-watch": "*",
     "grunt-contrib-coffee": "*",
     "grunt-release": ">=0.3.2",
+    "grunt-contrib-clean": "*",
     "memwatch": "*",
     "grunt-cafe-mocha": "~0.1.6",
-    "colors": "~0.6.0-1"
+    "sinon": "*",
+    "grunt-istanbul": "~0.2.1"
   },
   "optionalDependencies": {
     "nginx-conf": ">=0.1.0",

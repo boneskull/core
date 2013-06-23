@@ -1,6 +1,3 @@
-expect = require('chai').expect 
-fs = require 'fs'
-
 describe 'sx', ->
 
   it 'should be in the global variable', ->
@@ -14,8 +11,5 @@ describe 'sx', ->
   it 'should load all app configs before anything', ->
 
   it 'should load all modules specified in config', ->
-  
-  it 'should load all modules specified in config', ->
-    
 
   return

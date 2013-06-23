@@ -29,17 +29,25 @@ module.exports = function(program, name, options){
           originalPath = n(dir + '/../package.json'),
           bootstrap,
           original = fs.readJsonFileSync(originalPath),
-          version;
+          version,
+          transformers = require('transformers');
       
       pkg.dependencies = original.dependencies;
       
       bootstrap = {
         database: '',
         style: [],
+        templates: [],
         version: original.version
       };
       
       version = '*';
+
+      options.template.forEach(function(template){
+        if (template in transformers) {
+          bootstrap.templates.push(template);
+        }
+      });
       
       options.frontend.forEach(function(frontend) {
         switch (frontend.toLowerCase()) {
