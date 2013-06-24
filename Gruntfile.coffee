@@ -83,7 +83,7 @@ module.exports = (grunt) ->
           ignoreLeaks: false
           colors     : true
           ui         : 'bdd',
-          reporter   : 'json-cov'
+          reporter   : 'spec'
           coverage   :
             output: 'tests/lib-cov/coverage.html'
 
@@ -111,7 +111,7 @@ module.exports = (grunt) ->
     'instrument',
     #'reloadTasks',
     'cafemocha:coverage',
-    #'storeCoverage', 'makeReport'
+    'storeCoverage', 'makeReport'
   ]
   grunt.registerTask 'test:continuous', ['karma:continuous']
 

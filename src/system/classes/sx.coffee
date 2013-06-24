@@ -2,7 +2,7 @@ Factory = require path.normalize(__dirname + '/factory')
 
 module.exports = (root) ->
   
-  global.sx = sx = Class.extend('sx', {}, ->
+  global.sx = sx = Class.define('sx', {}, ->
     
     init = ->
       factoryChannel = postal.channel 'Factory'

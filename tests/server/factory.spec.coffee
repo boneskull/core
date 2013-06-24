@@ -109,7 +109,7 @@ describe 'factory', ->
     expect(sx.Class1).to.be.equal(Class1)
   
     Class2 = sx.factory 'Class2', {
-      $inherits: Class1
+      $extend: Class1
       doit2: ->
         'success'
     }
@@ -121,7 +121,7 @@ describe 'factory', ->
     expect(Class2.doit2()).to.equal('success')
   
     Class3 = sx.factory 'Class3', {
-      $inherits: 'Class2'
+      $extend: 'Class2'
       doit3: ->
         'success'
     }
@@ -163,7 +163,7 @@ describe 'factory', ->
     }
     
     Cls = sx.factory 'Cls', {
-      $inherits: Class
+      $extend: Class
       doit2: ->
         'success2'
     }
@@ -186,14 +186,14 @@ describe 'factory', ->
     }
 
     Class3 = sx.factory 'Class3', {
-      $inherits: [Class1, Class2]
+      $extend: [Class1, Class2]
       construct: ->
         @class2 = 3
         @class1 = 2
     }
     
     class3 = Class3.create()
-    expect(class3.$getClass().$className).to.be.equal('Class3')
+    expect(class3.$class.$className).to.be.equal('Class3')
     expect(class3.class2).to.be.equal(3)
     expect(class3.class1).to.be.equal(2)
     
@@ -208,7 +208,7 @@ describe 'factory', ->
     }
 
     Class3 = sx.factory 'Class3', {
-      $inherits: [Class1, 'Class2'] 
+      $extend: [Class1, 'Class2'] 
       init: 3
     }
     
@@ -227,7 +227,7 @@ describe 'factory', ->
     Class2 = sx.factory 'Class2'
 
     Class3 = sx.factory 'Class3', {
-      $inherits: [Class1, Class2, 'Class4'], 
+      $extend: [Class1, Class2, 'Class4'], 
       doit: ->
         'success'
     }
@@ -236,9 +236,66 @@ describe 'factory', ->
     expect(sx.Class3.done).to.be.a('function')
     expect(sx.Class3.doit()).to.equal('success')
     
+  it 'should deal with functions passed without problems', ->
+    
+    sx.factory('Clss', ->
+      up = 0
+      {
+        parlay: ->
+          'success'
+        up: ->
+          ++up
+      }
+    )
+    
+    expect(sx.classes.Clss).to.be.defined
+    expect(sx.classes.Clss.create().parlay()).to.equal('success')
+    expect(sx.classes.Clss.create().up()).to.equal(1)
+    expect(sx.classes.Clss.create().up()).to.equal(2)
+    
+    sx.factory('Clss', ->
+      {
+        $static: {
+          yuck: 'nah'
+        }
+        devious: =>
+          @yuck
+      }
+    )
+    
+    expect(sx.classes.Clss.yuck).to.be.equal('nah')
+    expect(sx.classes.Clss.create().devious()).to.be.equal('nah')
+    expect(sx.classes.Clss.create().up()).to.equal(3)
+    
+  it 'should be able to extend a class directly', ->
+    sx.factory 'Clss', {
+      $static: {
+        instances: [1,2,3]
+        variables: {'loaded': true}
+      }
+    }
+    
+    sx.classes.Clss.implement({
+      dull: true
+    })
+    
+    expect(sx.classes.Clss.instances).to.deep.equal([1,2,3])
+    expect(sx.classes.Clss.variables).to.deep.equal({'loaded': true})
+    expect(sx.classes.Clss.dull).to.equal(true)
+    expect(sx.classes.Clss.create().go).to.be.undefined
+    
+    sx.classes.Clss.dull = false
+    sx.classes.Clss.include({
+      go: ->
+        'success'
+    })
+    
+    expect(sx.classes.Clss.dull).to.be.equal(false)
+    expect(sx.classes.Clss.create().go()).to.be.equal('success')
+    
   it 'should create a new class even if an invalid parent is passed', ->
     sx.factory 'Cls', {
-      $inherits: 'Clsss'
+      $extend: 'Clsss'
       init: ->
         'success'
     }

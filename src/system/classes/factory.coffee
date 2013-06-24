@@ -4,31 +4,38 @@
 module.exports = (repository, channel) ->
   
   apply = (name, declaration, createdClass) ->
-    inherits = []
+    extend = []
     
     existing = createdClass?
+    
+    createdClass ?= Class.define(name)
+    
+    if _.isFunction(declaration)
+      declaration = declaration.call(createdClass, createdClass.$parent)
     
     if existing and createdClass.$singleton
       declaration.$singleton = true
     
-    if declaration.$inherits?
+    if declaration.$extend?
       
-      declaration.$inherits = [declaration.$inherits] if not _.isArray(declaration.$inherits)
+      declaration.$extend = [declaration.$extend] if not _.isArray(declaration.$extend)
       
-      for clss in declaration.$inherits
+      for clss in declaration.$extend
         if _.isString clss
           if clss of repository
-            inherits.push repository[clss]
+            extend.push repository[clss]
             declaration.$singleton = true if repository[clss].$singleton?
         else if clss.$className
-          inherits.push clss
+          extend.push clss
           declaration.$singleton = true if clss.$singleton
           
-      delete declaration.$inherits
+      delete declaration.$extend
     
-    createdClass ?= Class.extend(name)
+    createdClass.implement extend
     
-    createdClass.implement inherits
+    if declaration.$static
+      createdClass.implement(declaration.$static)
+      delete declaration.$static
     
     if declaration.$singleton is true
       createdClass.implement(declaration)
