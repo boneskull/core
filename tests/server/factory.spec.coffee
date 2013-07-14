@@ -15,11 +15,11 @@ describe 'factory', ->
     sx.factory 'uCLASS'
     sx.factory 'class-two'
     sx.factory 'class_three'
-
-    expect(sx.classes.Class).to.be.defined
-    expect(sx.classes.ClassTwo).to.be.defined
-    expect(sx.classes.ClassThree).to.be.defined
-    expect(sx.classes.UCLASS).to.be.defined
+  
+    expect(sx.classes.Class).to.be.ok
+    expect(sx.classes.UCLASS).to.be.ok
+    expect(sx.classes.ClassTwo).to.be.ok
+    expect(sx.classes.ClassThree).to.be.ok
     
   it 'should create a class if it doesnt exists', ->
     sx.factory 'Class', {
@@ -28,9 +28,9 @@ describe 'factory', ->
         'success'
     }
     
-    expect(sx.classes.Class).to.be.defined
-    expect(sx.classes.Class.dub).to.be.defined
-    expect(sx.classes.Class.dub).to.be.a.function
+    expect(sx.classes.Class).to.be.ok
+    expect(sx.classes.Class.dub).to.be.ok
+    expect(sx.classes.Class.dub).to.be.a('function')
     expect(sx.classes.Class.dub()).to.equal('success')
     
   it 'should publish "class.created" topic when a class is created', ->
@@ -40,7 +40,7 @@ describe 'factory', ->
     
     Cls2 = sx.factory 'Cls2'
     
-    expect(sx.classes.Cls).to.be.defined 
+    expect(sx.classes.Cls2).to.be.ok 
     expect(spy.calledWith({class: Cls2, name: 'Cls2'}), sinon.match.any).to.be.true
     
     sub.unsubscribe()
@@ -56,7 +56,7 @@ describe 'factory', ->
       extended: 1
     } 
      
-    expect(sx.Cls).to.be.defined
+    expect(sx.Cls).to.be.ok
     expect(sx.Cls.extended).to.equal(1)
     expect(spy.calledWith({class: sx.Cls, name: 'Cls'}), sinon.match.any).to.be.true
     
@@ -69,7 +69,7 @@ describe 'factory', ->
         'initial'
     }
     
-    expect(sx.Class).to.be.defined
+    expect(sx.Class).to.be.ok
     expect(sx.Class.initial).to.be.a('function')
     expect(sx.Class.initial()).to.equal('initial')
   
@@ -94,7 +94,7 @@ describe 'factory', ->
         'hello ' + @$super()
     }
     
-    expect(sx.Class).to.be.defined
+    expect(sx.Class).to.be.ok
     expect(sx.Class.base()).to.be.equal('hello world')
     
     
@@ -140,8 +140,8 @@ describe 'factory', ->
         'success'
     }
     
-    expect(sx.Class.func).to.be.defined
-    expect(sx.Class.func).to.be.a.function
+    expect(sx.Class.func).to.be.ok
+    expect(sx.Class.func).to.be.a('function')
     expect(sx.Class).to.be.deep.equal(Class1)
     expect(sx.Class.func()).to.equal('success')
   
@@ -150,8 +150,8 @@ describe 'factory', ->
         'success'
     }
   
-    expect(sx.Class.func2).to.be.defined
-    expect(sx.Class.func2).to.be.a.function
+    expect(sx.Class.func2).to.be.ok
+    expect(sx.Class.func2).to.be.a('function')
     expect(sx.Class).to.be.deep.equal(Class2)
     expect(sx.Class.func2()).to.equal('success')
     expect(sx.Class.func()).to.equal('success')
@@ -196,6 +196,7 @@ describe 'factory', ->
     expect(class3.$class.$className).to.be.equal('Class3')
     expect(class3.class2).to.be.equal(3)
     expect(class3.class1).to.be.equal(2)
+    expect(class3.$implements).to.be.deep.equal([Class1, Class2])
     
   it 'should overwrite methods in a order they are written', ->
     Class1 = sx.factory 'Class1', {
@@ -248,7 +249,7 @@ describe 'factory', ->
       }
     )
     
-    expect(sx.classes.Clss).to.be.defined
+    expect(sx.classes.Clss).to.be.ok
     expect(sx.classes.Clss.create().parlay()).to.equal('success')
     expect(sx.classes.Clss.create().up()).to.equal(1)
     expect(sx.classes.Clss.create().up()).to.equal(2)
@@ -282,7 +283,7 @@ describe 'factory', ->
     expect(sx.classes.Clss.instances).to.deep.equal([1,2,3])
     expect(sx.classes.Clss.variables).to.deep.equal({'loaded': true})
     expect(sx.classes.Clss.dull).to.equal(true)
-    expect(sx.classes.Clss.create().go).to.be.undefined
+    expect(sx.classes.Clss.create().go).to.be.an('undefined')
     
     sx.classes.Clss.dull = false
     sx.classes.Clss.include({
@@ -300,8 +301,40 @@ describe 'factory', ->
         'success'
     }
     
-    expect(sx.classes.Cls).to.be.defined
+    expect(sx.classes.Cls).to.be.ok
     expect(sx.classes.Cls.create().init).to.be.a('function')
     expect(sx.classes.Cls.create().init()).to.equal('success')
-  
+    
+  it 'should mixin without changing both classes', ->
+    sx.factory 'Cls', {
+      $static: {
+        init: ->
+          'success'
+      }
+    }
+    
+    expect(sx.classes.Cls).to.be.ok
+    expect(sx.classes.Cls.init()).to.equal('success')
+    
+    sx.factory 'Clss', {
+      $extend: 'Cls',
+      $static: {
+        'yes': true
+      }
+    }
+    
+    expect(sx.classes.Clss).to.be.ok
+    expect(sx.classes.Clss.yes).to.equal(true)
+    expect(sx.classes.Clss.init()).to.equal('success')
+
+    sx.factory 'Cls', {
+      $static: {
+        'another': 'static'
+      }
+    }
+    
+    expect(sx.classes.Cls.another).to.equal('static')
+    expect(sx.classes.Clss.$implements[0].another).to.equal('static')
+    expect(sx.classes.Clss.$implements[0]).to.deep.equal(sx.classes.Cls)
+    
   return

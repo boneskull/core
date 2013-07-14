@@ -73,17 +73,17 @@ module.exports = (grunt) ->
           checkLeaks : true
           colors     : true
           ui         : 'bdd',
-          reporter   : 'dot'
+          reporter   : 'spec'
 
       coverage:
         src    : './tests/server/**/*.spec.coffee'
         options:
-          require    : ['./tests/common.coffee','./<%=covervars.build %>/lib/']
+          require    : ['mocha-istanbul','./tests/common.coffee','./<%=covervars.build %>/lib/']
           globals    : ['__coverage__']
           ignoreLeaks: false
           colors     : true
           ui         : 'bdd',
-          reporter   : 'spec'
+          reporter   : 'mocha-istanbul'
           coverage   :
             output: 'tests/lib-cov/coverage.html'
 
@@ -105,14 +105,44 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-clean'
   grunt.loadNpmTasks 'grunt-istanbul'
 
-  grunt.registerTask 'test', ['cafemocha:test']
-  grunt.registerTask 'cover', [
-    'coffee', 'clean',
-    'instrument',
-    #'reloadTasks',
-    'cafemocha:coverage',
-    'storeCoverage', 'makeReport'
-  ]
+  grunt.registerTask 'test', ['coffee:compile','cafemocha:test']
+  grunt.registerTask 'cover', ->
+    grunt.task.run('coffee')
+    grunt.task.run('clean')
+    grunt.task.run('instrument')
+
+    ISTANBUL = require('grunt-istanbul/node_modules/istanbul')
+    fs = require('fs')
+
+    Report = ISTANBUL.Report;
+    Collector = ISTANBUL.Collector;
+
+    Istanbul = (runner)->
+
+      runner.on('end', ->
+        reporters = ['text-summary', 'html']
+
+        cov = global.__coverage__ || {};
+        opts = {
+          dir: 'tests/lib-cov/coverage.html'
+        }
+        collector = new Collector();
+
+        collector.add(cov)
+        fs.writeFileSync('tests/lib-cov/coverage.json', JSON.stringify(cov), 'utf8')
+
+        reporters.forEach((reporter) ->
+            Report.create(reporter, opts).writeReport(collector, true)
+        )
+      )
+
+    ###grunt.config.set('cafemocha', {
+      coverage:
+        options:
+          reporter: 'asdf'
+    })###
+    #grunt.task.run('cafemocha:coverage')
+
   grunt.registerTask 'test:continuous', ['karma:continuous']
 
   grunt.registerTask 'build', ['coffee', 'test']

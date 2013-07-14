@@ -30,7 +30,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/pocesar/node-socketexpress"
+    "url": "git://github.com/pocesar/node-socketexpress.git"
   },
   "directories": {
     "lib": "./lib"
@@ -45,6 +45,7 @@
     "async": ">=0.2.6",
     "formidable": ">=1.0.13",
     "moment": ">=2.0.0",
+    "moment-timezone": "*",
     "validator": ">=0.4.28",
     "express-validator": ">=0.3.2",
     "accounting": ">=0.3.2",
@@ -68,7 +69,9 @@
     "underscore.string": "*",
     "lodash": "*",
     "colors": "*",
-    "postal": "~0.8.4"
+    "postal": "~0.8.4",
+    "connect-redis": "*",
+    "connect-mongo": "*"
   },
   "devDependencies": {
     "chai": "*",
@@ -80,6 +83,7 @@
     "grunt-release": ">=0.3.2",
     "grunt-contrib-clean": "*",
     "memwatch": "*",
+    "mocha-istanbul": "*",
     "grunt-cafe-mocha": "~0.1.6",
     "sinon": "*",
     "grunt-istanbul": "~0.2.1"

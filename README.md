@@ -19,52 +19,63 @@ $ npm install socket-express -g
 Start a new app
 =============
 
-```
+```bash
 $ sx new app
 ```
 
 Will create a new SX application on the `app` folder
+
+Update an existing app
+=============
+
+Inside your app path
+
+```bash
+$ sx update
+```
+
+It will update the Socket Express system folder and dependencies
 
 Highlights
 =============
 
 * No DSL
 * No new jargon to learn
-* Built around the _Repository Pattern_, _Dependency Injection Pattern_ and based on _Pub/Sub_ (through `postal.js`)
+* Built around the _Repository Pattern_, _Dependency Injection Pattern_ and based on _Pub/Sub_ for events (through `postal.js`)
 * Plain Javascript (or Coffeescript if you fancy that)
 * Nothing is enforced, you only need to follow folder structure and don't clutter the global namespace
 * Convention over configuration
-* Everything are _classes_ that you can extend to override behavior or add functionality
-* There's only one sexy global variable that rhymes: `sx`
+* Everything are _classes_ that you can extend to override behavior or add functionality, but favoring _Object Composition_ over _Class Inheritance_
+* There's only one sexy global namespace that rhymes: `sx`, and a couple of helpers: `ES5Class`, `fs`, `path`, `_`, `_s`, `postal`, `Lazy`
 * No nested _callback hell_, almost everywhere you can use Promises/Futures and Async library
 * Ready for node 0.8, 0.10 and 0.11
-* Intuitive naming for classes, no specific project namespaces that you need to keep going to the documentation to understand
-* Free from _require hell_, using some convention magic
-* Really easy to test, `modules`, `controllers`, `views`, `models`
+* Intuitive naming for classes, minimizing the need to keep going to the documentation to understand
+* Free from _require hell_, using some magic through convention
+* Focused on testing, it's really easy to test, `modules`, `controllers`, `views`, `models`
 
 Conventions
 =============
 
-### Cascading class extend and Factory
+### Cascading file system (CFS) and Factory
 
-Most of the time you'll want to create your own classes, or extend the core classes using the `sx.factory` or 
-`sx.class.extend` methods, this is what makes your classes and code be available in your entire app, without
-needing to use `require` or reading the files manually. All the classes created are stored in the `sx.classes` 
-repository, and they return the uninstantiated class. The `sx.classname` is the instantiated class taken from
- the `sx.classes`: 
- 
+Most of the time you'll want to create your own classes, or extend the core classes using the `sx.factory` method,
+this is what makes your classes and code be available in your entire app, without needing to use `require` or
+reading the files manually. All the classes created are stored in the `sx.classes`  _repository_, and they return
+the uninstantiated class. The `sx.*classname*` is the shortcut class taken from the `sx.classes.*classname*`:
+
 ```js
-sx.classes.View // this is a base class, that you can extend your own classes, 
+sx.classes.View // this is a base class, that you can extend your own classes
 sx.View // this doesn't exists
 sx.classes.Url // this exists and it's a $singleton
 sx.Url // since it's a singleton, it's automatically instantiated
 ```
 
-You may not want to instantiate a class (like the case of `View` class), for that, because it's a building block and 
-must be extended to have a functionality. 
+You may not want to instantiate a class (like the case of `View` class), for that, because it's a building block and
+must be extended to have a functionality.
 
 ```js
 sx.factory('Test', {
+    $extend: 'View',
     execute: function(){},
     main: function(){},
     constructor: function(){}
@@ -76,8 +87,10 @@ and must be available everywhere in your code. To create a singleton, you can us
 
 ```js
 sx.factory('MyHelper', {
-    $singleton: true, 
-    staticMethod: function(){},
+    $singleton: true,
+    staticMethod: function(){
+
+    },
     staticMethod2: function(){
         return function(){};
     },
@@ -92,11 +105,26 @@ sx.MyHelper.implement({
 });
 
 sx.MyHelper.newMethod();
-``` 
+```
 
-* You can extend any core classes, rewrite how it works, or simply add more functionality. 
-    
-To do this simply do 
+You may also separate your static class methods and variables from the prototype functions:
+
+```js
+sx.factory('MyClass', {
+    $static: {
+        staticFunction: function(){ }
+    },
+    prototypeFunction: function(){ }
+});
+
+console.log(sx.classes.MyClass.staticFunction); // function
+console.log(sx.classes.MyClass.prototypeFunction); // undefined
+console.log(sx.classes.MyClass.create().prototypeFunction); // function
+```
+
+* You can extend any core classes, rewrite how it works, or simply add more functionality.
+
+To do this simply do
 
 ```js
 sx.Url.implement({
@@ -104,43 +132,46 @@ sx.Url.implement({
 });
 ```
 
-this will extend the core class `Url` and add the `cool` method. 
-You may also want to rewrite some of the functionality maybe? Using `implement`, 
+this will extend the core class `Url` and add the `cool` method, because the `Url` class is a
+singleton.
+
+You may also want to rewrite some of the functionality maybe? Using `implement`,
 you can extend a helper
 
 ```js
 sx.Url.implement({
-    title: function(name){ 
-        name = name.replace('-','_');  
-        return this.$super(name);     
+    title: function(name){
+        return this.$super(name, '-', true);  // call the super function, that is, the original sx.Url.title
     }
 });
 ```
 
-or you want to create a new. Notice the call to the `this.$super`, that calls the original `title` function
-ultra cool your-own `Url` class, but still use the provided core `Url` class, use `$inherits`.
+or you want to create a new class from the base of another. Notice the call to the
+`this.$super`, that calls the original `title` function ultra cool your-own `Url` class,
+but still use the provided core `Url` class, use `$extend`.
 
 ```js
 sx.factory('CoolUrl', {
-    $inherits: 'Url',
+    $extend: 'Url',
     /*
     these all work the same way
-    
-    $inherits: ['Url'],
-    $inherits: sx.Url,
-    $inherits: [sx.Url],
+
+    $extend: ['Url'],
+    $extend: sx.Url,
+    $extend: [sx.Url],
     */
     tooGood: function(){
+
     }
 });
 ```
 
-This will create a singleton in `sx.CoolUrl.tooGood();`, so you can already use it 
-everywhere in your app. Note that the `sx.Url` is created with `$singleton`, that 
+This will create a singleton in `sx.CoolUrl.tooGood();`, so you can already use it
+everywhere in your app. Note that the `sx.Url` is created with `$singleton` option, that
 effectivelly make it available in the `sx` global, since it has no "prototype" functions:
 
 ```js
-var myUrl = sx.classes.Url.create('myUrl');
+var myUrl = sx.classes.Url.create('myUrl'); // trying to instantiate the Url class
 
 typeof myUrl.title // undefined
 typeof sx.Url.title // function
@@ -164,8 +195,8 @@ sx.factory('SpecificHelper', {
 sx.SpecificHelper.doThis(...);
 ```
 
-It's a good practice to keep each class in their own file, so it's maintainable. But nothing stops you to create
-as many `factory`s in the same file:
+It's a good practice to keep each class in their own file, so it's maintainable and easy to goto. But
+nothing stops you to create as many `factory`s in the same file:
 
 ```js
 // app/classes/all.js
@@ -175,10 +206,12 @@ sx.factory('Class1', {
 Class2 = sx.factory('Class2', {
 });
 
-sx.factory('Class3', [Class2], {
+sx.factory('Class3', {
+    $extend: [Class2]
 });
 
-sx.factory('Class4', 'Class3', {
+sx.factory('Class4', {
+    $extend: 'Class3'
 });
 ```
 
@@ -186,45 +219,51 @@ sx.factory('Class4', 'Class3', {
 
 * Your controllers go into `app/classes/controller/`, with a lowercase filename, and a class extending:
 
-* `Controler`: A controller that does nothing at first, you decide what it should return
-* `ControllerTemplate`: A controller that automatically render content inside the 'content' var
+* `Controler`: A controller that does nothing at first, only respond to routes, you decide what it should return
+* `ControllerTemplate`: A controller that automatically render content inside the 'content' var in the template
 * `ControllerREST`: A regular controller that responds to REST commands (DELETE, PUT, POST, GET)
-* `ControllerRealtime`: A realtime controller that uses Socketstream to push updates to the browser, and do long polling
+* `ControllerRealtime`: A realtime controller that uses Socketstream to push updates to the browser using Websockets (when available)
 
 as a string (core class), CamelCased.
 
 ```js
 // file app/classes/controller/index.js
 // will be available in sx.controllers.Index
-sx.factory('Index', ['Controller'], {
+sx.factory('Index', {
+    $extend: 'Controller',
     'actionIndex': function(){
     }
 });
 
 // file modules/mymodule/controller/index.js
 // will be available in sx.modules.mymodule.controllers.Index
-sx.factory('Index', 'ControllerTemplate', {
+sx.factory('Index', {
+    $extend: 'ControllerTemplate',
     'actionIndex': function(){
     }
 });
 
 // file app/classes/master.js
 // will be available in sx.classes.Master
-sx.factory('Master', 'ControllerTemplate', {
+sx.factory('Master', {
+    $extend: 'ControllerTemplate',
     'actionLogin': function(){
     }
 });
 
 // file app/classes/controller/contact.js
 // will be available in sx.controllers.Contact
-sx.factory('Contact', 'Master', {
+sx.factory('Contact', {
+    $extend: 'Master',
     'actionIndex': function(){
         this.actionLogin();
     }
 });
 
-// You can inherit mixins and base classes as well
-sx.factory('Contact', ['Master','ControllerREST'], {
+// You can include mixins and base classes as well, changes to original classes
+// won't reflect in the mixin'd class
+sx.factory('Contact', {
+    $extend: ['Master','ControllerREST']
     /* ... */
 });
 ```
@@ -243,7 +282,7 @@ Since each module has also their own namespace, they will be available in their 
 ```js
 console.log(sx.modules.mymodule.controllers.Index.$render()) // index from the module
 console.log(sx.module('mymodule.controllers.Index').$render()); // getter that makes it easier to return a module using an string
-console.log(sx.module(['mymodule','controllers','Index').$render()); // getter that makes it easier to return a module using an array
+console.log(sx.module(['mymodule','controllers','Index']).$render()); // getter that makes it easier to return a module using an array
 ```
 
 ### Modules
@@ -253,7 +292,7 @@ console.log(sx.module(['mymodule','controllers','Index').$render()); // getter t
 Create a module:
 
 1. Create a new folder inside `modules` folder, eg. 'mymodule' or using the command line `sx generate module mymodule`
-2. Enable it in `app/config/modules.js` adding `{'mymodule': 'mymodule'}`
+2. Enable it in `app/config/modules.js` adding `{'mymodule': 'mymodule'}` (if you are doing it manually)
 3. If you need to load additional files, create the file `modules/mymodule/index.js`, and the code inside will be automatically called when the app starts
 4. Place your config inside `modules/mymodule/config/mymodule.js`, in form of a export, eg. `module.exports = {myvar: 1, loadextra: true}`
 5. You can call `sx.modules.mymodule.config` to access the current config, and also, you can access the module namespace using `sx.modules.mymodule` (views, controllers, models, etc)
@@ -281,7 +320,7 @@ A module can also extend core classes, create new classes, but can't access `app
 // modules/mymodule/classes/test.js
 sx.factory('Test', function(){
     var channel = sx.events.channel('Test');
-    
+
     return {
         pipe: function(data){
           channel.publish('pipe', data);
@@ -296,7 +335,7 @@ sx.factory('Test', function(){
 sx.factory('LOL', {
     main: function(){
         var channel = sx.modules.mymodule.Test.channel();
-        
+
         channel.subscribe('pipe', function(data){
             /* deal with data */
         });
@@ -307,7 +346,7 @@ sx.factory('LOL', {
 sx.factory('LMAO', {
     main: function(){
         var pipe = sx.modules.mymodule.Test.pipe;
-        
+
         pipe({init: true});
     }
 });

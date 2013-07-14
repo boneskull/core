@@ -8,7 +8,7 @@ module.exports = (repository, channel) ->
     
     existing = createdClass?
     
-    createdClass ?= Class.define(name)
+    createdClass ?= ES5Class.define(name)
     
     if _.isFunction(declaration)
       declaration = declaration.call(createdClass, createdClass.$parent)
@@ -44,7 +44,7 @@ module.exports = (repository, channel) ->
   
     repository[name] = createdClass
     
-    channel.publish 'class.created', {class: repository[name], name: name }
+    channel?.publish 'class.created', {class: repository[name], name: name }
       
     createdClass
   
@@ -55,19 +55,13 @@ module.exports = (repository, channel) ->
     apply(name, declaration, repository[name])
     
   (name, declaration = {}) ->
-    name = _s.classify(name)
+    name = _s.classify(name.replace(/\-/g, ' '))
     
     if arguments.length is 1
       # No parent has been passed, only a 'name' as string
-      if !(name of repository)
-        out = create(name)
-      else
-        out = repository[name]
+      out = if not (name of repository) then create(name) else repository[name]
     else
-      if (name of repository)
-        out = extend(name, declaration)
-      else
-        out = create(name, declaration)
+      out = if (name of repository) then extend(name, declaration) else create(name, declaration)
 
     out
  

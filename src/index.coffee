@@ -12,7 +12,7 @@ trycatch.configure
 `Lazy = require('lazy.js')`
 `_ = require('lodash')`
 `postal = require('postal')(_)`
-`Class = require('es5class')`
+`ES5Class = require('es5class')`
 `_s = require('underscore.string')`
 
-require(path.normalize(__dirname + '/system/classes/sx'))(__dirname)
+require(path.normalize(__dirname + '/system/core/sx'))(__dirname)
