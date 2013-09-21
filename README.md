@@ -4,7 +4,7 @@ Socket Express (SX for short)
 =============
 
 When realtime and stateless HTTP get together, and live happily ever after.
-HMVC (Hierarchical model–view–controller) framework built on top of [SocketStream](https://github.com/socketstream/socketstream) and [Express.js](https://github.com/visionmedia/express) for [Node.js](http://nodejs.org),
+HMVC (Hierarchical model–view–controller) framework built on top of [Primus](https://github.com/primus/primus) and [Express.js](https://github.com/visionmedia/express) for [Node.js](http://nodejs.org),
 inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone for Node for you)
 
 Using nothing more than already existing packages in NPM but with some consistent, maintainable, _cascading class-based Javascript_ glue together.
@@ -222,7 +222,8 @@ sx.factory('Class4', {
 * `Controler`: A controller that does nothing at first, only respond to routes, you decide what it should return
 * `ControllerTemplate`: A controller that automatically render content inside the 'content' var in the template
 * `ControllerREST`: A regular controller that responds to REST commands (DELETE, PUT, POST, GET)
-* `ControllerRealtime`: A realtime controller that uses Socketstream to push updates to the browser using Websockets (when available)
+* `ControllerRealtime`: A realtime controller that uses Primus to push updates to the browser using Websockets (when available)
+* `ControllerAjax`: A controller that can respond to AJAX requests automatically
 
 as a string (core class), CamelCased.
 
