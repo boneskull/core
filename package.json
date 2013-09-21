@@ -3,14 +3,14 @@
   "version": "0.0.6",
   "author": "Paulo Cesar",
   "homepage": "http://socketexpress.net",
-  "description": "When realtime and stateless HTTP together, live happily ever after. HMVC framework built on top of SocketStream and Express.js for Node.js, inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone for Node for you)",
+  "description": "When realtime and stateless HTTP together, live happily ever after. HMVC framework built on top of Primus and Express.js for Node.js, inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone for Node for you)",
   "keywords": [
     "HMVC",
     "MVC",
     "framework",
     "realtime",
     "express",
-    "socketstream",
+    "primus",
     "fullstack",
     "spdy",
     "orm",
@@ -36,7 +36,6 @@
     "lib": "./lib"
   },
   "dependencies": {
-    "socketstream": "~0.3.0",
     "cors": "*",
     "express": ">=3.1.0",
     "express-expose": ">=0.3.3",
@@ -71,7 +70,10 @@
     "colors": "*",
     "postal": "~0.8.4",
     "connect-redis": "*",
-    "connect-mongo": "*"
+    "connect-mongo": "*",
+    "konphyg": "~1.2.0",
+    "reversable-router": "~1.0.0",
+    "primus": "~1.4.2"
   },
   "devDependencies": {
     "chai": "*",
