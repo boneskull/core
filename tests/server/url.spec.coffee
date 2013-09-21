@@ -1,11 +1,9 @@
-describe 'url', ->
+module.exports =
+  'url':
+    'should be defined and available': ->
+      expect(sx.Url).to.be.ok
 
-  it 'should be defined and available', ->
-    expect(sx.Url).to.be.ok
+    'title': ->
 
-  describe 'title', ->
-
-    it 'should convert the text to a slug', ->
-      expect(sx.Url.title('THIS TITLE')).to.equal('this-title')
-
-  return
+      'should convert the text to a slug': ->
+        expect(sx.Url.title('THIS TITLE')).to.equal('this-title')

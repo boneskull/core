@@ -72,7 +72,7 @@ module.exports = (grunt) ->
           ignoreLeaks: false
           checkLeaks : true
           colors     : true
-          ui         : 'bdd',
+          ui         : 'exports',
           reporter   : 'spec'
 
       coverage:
@@ -82,7 +82,7 @@ module.exports = (grunt) ->
           globals    : ['__coverage__']
           ignoreLeaks: false
           colors     : true
-          ui         : 'bdd',
+          ui         : 'exports',
           reporter   : 'mocha-istanbul'
           coverage   :
             output: 'tests/lib-cov/coverage.html'

@@ -217,7 +217,7 @@ sx.factory('Class4', {
 
 ### Controllers
 
-* Your controllers go into `app/classes/controller/`, with a lowercase filename, and a class extending:
+Your controllers go into `app/classes/controller/`, with a lowercase filename, and a class extending:
 
 * `Controler`: A controller that does nothing at first, only respond to routes, you decide what it should return
 * `ControllerTemplate`: A controller that automatically render content inside the 'content' var in the template
