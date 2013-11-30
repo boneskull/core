@@ -144,7 +144,7 @@ module.exports = ES5Class.define('sx', {}, ->
       factory: Factory(classes, dependencyLoader)
       setPaths: setPaths
       init: init
-      load: (name, where) ->
+      load: (name, where, to) ->
         _path = false
 
         if where is undefined
@@ -156,7 +156,9 @@ module.exports = ES5Class.define('sx', {}, ->
 
           return ret
         else
-          _path = if where of @paths then path.normalize("#{@paths[where]}classes/#{name.toLowerCase()}.js") else false
+          if where is 'modules'
+          else
+            _path = if where of @paths then path.normalize("#{@paths[where]}classes/#{name.toLowerCase()}.js") else false
 
         if _path and fs.existsSync(_path)
           declaration = require _path
