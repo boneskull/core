@@ -7,12 +7,8 @@ trycatch.configure
     node_modules: false
     'default'     : 'yellow'
 
-`path = require('path')`
-`fs = require('fs')`
-`Lazy = require('lazy.js')`
-`_ = require('lodash')`
-`postal = require('postal')(_)`
-`ES5Class = require('es5class')`
-`_s = require('underscore.string')`
+path = require('path')
 
-require(path.normalize(__dirname + '/system/core/sx'))(__dirname)
+global.sx = require(path.normalize(__dirname + '/system/core/sx'))
+
+sx.setPath(path.normalize(__dirname))

@@ -1,0 +1,9 @@
+{
+  "default": {
+    "pattern": "",
+    "defaults": {
+      "controller": "home",
+      "action": "index"
+    }
+  }
+}

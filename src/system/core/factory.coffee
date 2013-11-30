@@ -1,25 +1,30 @@
 # add the created classes in repository
 # publishes to channel the topic 'class.created'
 
-module.exports = (repository, channel) ->
-  
+ES5Class = require('es5class')
+_s = require('underscore.string')
+_ = require('lodash')
+
+module.exports = (repository, callback) ->
+  'use strict'
+
   apply = (name, declaration, createdClass) ->
     extend = []
-    
+
     existing = createdClass?
-    
+
     createdClass ?= ES5Class.define(name)
-    
+
     if _.isFunction(declaration)
       declaration = declaration.call(createdClass, createdClass.$parent)
-    
+
     if existing and createdClass.$singleton
       declaration.$singleton = true
-    
+
     if declaration.$extend?
-      
+
       declaration.$extend = [declaration.$extend] if not _.isArray(declaration.$extend)
-      
+
       for clss in declaration.$extend
         if _.isString clss
           if clss of repository
@@ -28,35 +33,54 @@ module.exports = (repository, channel) ->
         else if clss.$className
           extend.push clss
           declaration.$singleton = true if clss.$singleton
-          
+
       delete declaration.$extend
-    
+
     createdClass.implement extend
-    
+
     if declaration.$static
+      # always go to base function instead of prototype
       createdClass.implement(declaration.$static)
       delete declaration.$static
-    
+
+    if declaration.$deps
+      # convert any abnormal dependency name to a proper CamelCase
+      for k,v of declaration.$deps
+        if _.isString(declaration.$deps[k])
+          declaration.$deps[k] = classify(v)
+
+      # pass in the dependencies array to the class, to be converted to an object later on
+      # available in both class and prototype
+      createdClass.implement({
+                               $deps: declaration.$deps,
+                               $: {}
+                               prototype: {$deps: declaration.$deps, $: {}}
+                             })
+      delete declaration.$deps
+
     if declaration.$singleton is true
-      createdClass.implement(declaration)
+      # everything goes to the base function
+      createdClass.implement declaration
     else
-      createdClass.include(declaration)
-  
+      # everything goes to the prototype
+      createdClass.include declaration
+
+    # modify our repository to have our new(?) class
     repository[name] = createdClass
-    
-    channel?.publish 'class.created', {class: repository[name], name: name }
-      
+
+    callback?(class: repository[name], name: name)
+
     createdClass
-  
+
   create = (name, declaration = {}) ->
     apply(name, declaration)
 
   extend = (name, declaration = {}) ->
     apply(name, declaration, repository[name])
-    
+
   (name, declaration = {}) ->
-    name = _s.classify(name.replace(/\-/g, ' '))
-    
+    name = classify(name)
+
     if arguments.length is 1
       # No parent has been passed, only a 'name' as string
       out = if not (name of repository) then create(name) else repository[name]
@@ -64,4 +88,6 @@ module.exports = (repository, channel) ->
       out = if (name of repository) then extend(name, declaration) else create(name, declaration)
 
     out
- 
+
+module.exports.classify = classify = (name) ->
+  _s.classify(name.replace(/\-/g, ' '))

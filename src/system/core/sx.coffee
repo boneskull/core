@@ -1,73 +1,99 @@
 Factory = require './factory'
+
 app = require('express')()
+
+path = require('path')
+fs = require('fs')
+glob = require('glob')
+_ = require('lodash')
+_s = require('underscore.string')
+postal = require('postal')(_)
+ES5Class = require('es5class')
 
 # Global singleton, the heart of the SX framework
 
-module.exports = (root) ->
-  'use strict'
+module.exports = ES5Class.define('sx', {}, ->
 
-  global.sx = ES5Class.define('sx', {}, ->
+    sxChannel = postal.channel 'sx'
 
     init = =>
-      factoryChannel = postal.channel 'Factory'
-      sxChannel = postal.channel 'sx'
+      loaddir = (spath, ext = '') =>
+        _(fs.readdirSync(@paths[spath] + ext)).each((file) =>
+          @load(path.normalize(ext + '/' + file), spath)
+        )
+
+      # load system classes
+      loaddir('system', 'classes')
+
+      # load modules
+      #fs.readdirSync()
+
+      # load app classes
+      @load('bootstrap')
+
+      #fs.readdirSync()
+
+
+    setPaths = (root) =>
+
+      normalize = (_path) ->
+        path.normalize(root + _path)
 
       @implement(
-        # repository
-        classes: {}
-
-        modules: {}
-
-        controllers: {}
-
-        routes: {}
-
-        models: {}
-
         paths:
-          'root'   : path.normalize(root + '/')
-          'system' : path.normalize(root + '/system/')
-          'app'    : path.normalize(root + '/app/')
-          'public' : path.normalize(root + '/public/')
-          'modules': path.normalize(root + '/modules/')
-
-        load: (name, where) ->
-          path = if where? and where of @paths then "#{@paths[where]}#{name}" else ""
-          require path
-
-        events:
-          create: postal
-
-          channel: (name) ->
-            postal.channel name
-
-          publish: (event, data) ->
-            sxChannel.publish event, data
-
-          subscribe: (event, cb) ->
-            sxChannel.subscribe event, cb
-
-          unsubscribe: (event) ->
-            subscribers = postal.utils.getSubscribersFor {channel: 'sx', topic: event}
-
-            if subscribers?.length
-              subscriber.unsubscribe() for subscriber in subscribers
+          root   : normalize('/')
+          system : normalize('/system/')
+          app    : normalize('/app/')
+          public : normalize('/public/')
+          modules: normalize('/modules/')
       )
 
-      factoryChannel.subscribe(
-        'class.created'
-        (data) =>
-          if data.class?
-            if (data.class.$singleton is true) or (data.class.$global is true)
-              @[data.name] = data.class
-            else if data.class.$initialize?
-              @[data.name] = data.class.create(data.class.$initialize)
+      return
 
-            @events.publish 'class.created', data
-      )
+    classes = {}
 
-      toPath = (item) =>
-        obj = @classes
+    dependencyLoader = (data) =>
+      if data.class?
+        if (data.class.$singleton is true) or (data.class.$global is true)
+          @[data.name] = data.class
+        else if data.class.$initialize?
+          @[data.name] = data.class.create(data.class.$initialize)
+
+        if data.class.$deps and _.size(data.class.$deps)
+          dependencies = {}
+
+          for key,dep of data.class.$deps
+            if _.isString(dep)
+              if classes[dep]
+                dependencies[dep] = classes[dep]
+              else
+                if loaded = @load(dep)
+                  dependencies[dep] = loaded
+                else
+                  throw new Error(_s.sprintf('Invalid dependency on %s: %s', data.name, dep))
+            else if _.isPlainObject(dep)
+              for key,i of dep
+                if _.isArray(i)
+                  dependencies[key] = require(i[0])[i[1]]
+                else
+                  dependencies[key] = require i
+            else
+              throw new Error('$deps must be an array of strings or objects')
+
+          data.class.$ = data.class::$ = dependencies
+
+        @events.publish 'class.created', data
+
+    {
+      # repository
+      classes: classes
+      modules: {}
+      controllers: {}
+      routes: {}
+      models: {}
+      configs: {}
+      _toPath: (item, type = 'classes') ->
+        obj = @[type]
 
         if _.isArray(item)
           for x in item
@@ -81,44 +107,61 @@ module.exports = (root) ->
         else
           obj
 
-      @implement(
-        factory: Factory(@classes, factoryChannel)
+      controller: (name) ->
+        @_toPath(name)
 
-        controller: (name) ->
-          toPath(name)
+      module: (name) ->
+        @_toPath(name)
 
-        module: (name) ->
-          toPath(name)
+      model: (name) ->
+        @_toPath(name)
 
-        model: (name) ->
-          toPath(name)
+      route: (name) ->
+        @_toPath(name)
 
-        route: (name) ->
-          toPath(name)
+      config: (name) ->
+        @_toPath(name)
 
-        app: app
-      )
+      app: app
+      events:
+        create: postal
 
-      loaddir = (spath, ext = '') =>
-        _(fs.readdirSync(@paths[spath] + ext)).each((file) =>
-          @load(path.normalize(ext + '/' + file), spath)
-        )
+        channel: (name) ->
+          postal.channel name
 
+        publish: (event, data) ->
+          sxChannel.publish event, data
 
-      # load system classes
-      loaddir('system', 'classes')
+        subscribe: (event, cb) ->
+          sxChannel.subscribe event, cb
 
-      # load modules
-      #fs.readdirSync()
+        unsubscribe: (event) ->
+          subscribers = postal.utils.getSubscribersFor {channel: 'sx', topic: event}
 
-      # load app classes
-      @load('bootstrap', 'app')
+          if subscribers?.length
+            subscriber.unsubscribe() for subscriber in subscribers
 
-      #fs.readdirSync()
+      factory: Factory(classes, dependencyLoader)
+      setPaths: setPaths
+      init: init
+      load: (name, where) ->
+        _path = false
 
-      return
+        if where is undefined
+          ret = false
+          # unespecific, load in cascade
+          for v in ['system','modules','app']
+            if (_ret = @load(name, v)) isnt false
+              ret = _ret
 
-    init: init
-  )
+          return ret
+        else
+          _path = if where of @paths then path.normalize("#{@paths[where]}classes/#{name.toLowerCase()}.js") else false
 
-  sx.init()
+        if _path and fs.existsSync(_path)
+          declaration = require _path
+          return @factory(name, declaration)
+
+        false
+    }
+)

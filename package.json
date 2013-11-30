@@ -38,7 +38,6 @@
   "dependencies": {
     "cors": "*",
     "express": ">=3.1.0",
-    "express-expose": ">=0.3.3",
     "jugglingdb": ">=0.2.0",
     "transformers": ">=2.0.0",
     "async": ">=0.2.6",
@@ -48,6 +47,7 @@
     "validator": ">=0.4.28",
     "express-validator": ">=0.3.2",
     "accounting": ">=0.3.2",
+    "postal": "*",
     "gm": ">=1.8.2",
     "passport": ">=0.1.16",
     "nodemailer": ">=0.4.1",
@@ -62,33 +62,34 @@
     "toobusy": ">=0.2.3",
     "lazy.js": "*",
     "hashids": "*",
-    "fs-extra": "~0.6.1",
+    "fs-extra": "*",
     "semver": "*",
-    "bower": "~0.9.2",
     "underscore.string": "*",
     "lodash": "*",
     "colors": "*",
-    "postal": "~0.8.4",
     "connect-redis": "*",
     "connect-mongo": "*",
-    "konphyg": "~1.2.0",
-    "reversable-router": "~1.0.0",
-    "primus": "~1.4.2"
+    "reversable-router": "1.0.0",
+    "primus": "1.4.x",
+    "exon": "0.0.4",
+    "glob": "*",
+    "xregexp": "~2.0.0",
+    "getobject": "~0.1.0"
+  },
+  "peerDependencies": {
+    "bower": "*"
   },
   "devDependencies": {
-    "chai": "*",
-    "grunt": "~0.4.0",
+    "expect.js": "*",
+    "grunt": "0.4.x",
     "grunt-cli": "*",
-    "grunt-karma": "*",
     "grunt-contrib-watch": "*",
     "grunt-contrib-coffee": "*",
     "grunt-release": ">=0.3.2",
     "grunt-contrib-clean": "*",
     "memwatch": "*",
-    "mocha-istanbul": "*",
-    "grunt-cafe-mocha": "~0.1.6",
     "sinon": "*",
-    "grunt-istanbul": "~0.2.1"
+    "grunt-mocha-test": "0.7.x"
   },
   "optionalDependencies": {
     "nginx-conf": ">=0.1.0",
