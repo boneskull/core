@@ -1,7 +1,8 @@
 module.exports = {
   $deps: [
-    'Config'
+    {'konphyg': 'konphyg'}
   ]
+  $initialize: true
   construct: ->
 
 }

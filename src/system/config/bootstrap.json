@@ -1,7 +1,10 @@
 {
   "*": {
     "locale": ["en"],
-    "base_url": "/"
+    "base_url": "/",
+    "domain": "localhost",
+    "port": 3000,
+    "protocol": "http"
   },
   "development": {
   },

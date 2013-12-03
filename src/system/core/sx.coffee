@@ -54,12 +54,10 @@ module.exports = ES5Class.define('sx', {}, ->
 
     dependencyLoader = (data) =>
       if data.class?
-        if (data.class.$singleton is true) or (data.class.$global is true)
+        if data.class.$singleton is true
           @[data.name] = data.class
-        else if data.class.$initialize?
-          @[data.name] = data.class.create(data.class.$initialize)
 
-        if data.class.$deps and _.size(data.class.$deps)
+        if _.size(data.class.$deps)
           dependencies = {}
 
           for key,dep of data.class.$deps
@@ -76,13 +74,28 @@ module.exports = ES5Class.define('sx', {}, ->
                 if _.isArray(i)
                   dependencies[key] = require(i[0])[i[1]]
                 else
-                  dependencies[key] = require i
+                  dependencies[key] = require(i)
             else
-              throw new Error('$deps must be an array of strings or objects')
+              throw new Error(_s.sprintf('$deps for %s must be an array of strings or objects', data.name))
 
           data.class.$ = data.class::$ = dependencies
 
-        @events.publish 'class.created', data
+        data.class.setup?()
+
+        switch data.to
+          when 'controllers'
+            @controllers
+          when 'modules'
+            @modules
+          when 'models'
+            @models
+          when 'configs'
+            @configs
+          when 'routes'
+            @routes
+
+        if data.class.$initialize?
+          @[data.name] = new data.class(data.class.$initialize)
 
     {
       # repository
@@ -162,7 +175,8 @@ module.exports = ES5Class.define('sx', {}, ->
 
         if _path and fs.existsSync(_path)
           declaration = require _path
-          return @factory(name, declaration)
+          cls = @factory(name, declaration, to)
+          return cls
 
         false
     }

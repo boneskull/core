@@ -8,7 +8,7 @@ _ = require('lodash')
 module.exports = (repository, callback) ->
   'use strict'
 
-  apply = (name, declaration, createdClass) ->
+  apply = (name, declaration, createdClass, to) ->
     extend = []
 
     existing = createdClass?
@@ -68,24 +68,24 @@ module.exports = (repository, callback) ->
     # modify our repository to have our new(?) class
     repository[name] = createdClass
 
-    callback?(class: repository[name], name: name)
+    callback?(class: repository[name], name: name, to: to)
 
     createdClass
 
-  create = (name, declaration = {}) ->
-    apply(name, declaration)
-
-  extend = (name, declaration = {}) ->
-    apply(name, declaration, repository[name])
-
-  (name, declaration = {}) ->
+  (name, declaration = {}, to) ->
     name = classify(name)
+
+    create = () ->
+      apply(name, declaration, null, to)
+
+    extend = () ->
+      apply(name, declaration, repository[name], to)
 
     if arguments.length is 1
       # No parent has been passed, only a 'name' as string
-      out = if not (name of repository) then create(name) else repository[name]
+      out = if not (name of repository) then create() else repository[name]
     else
-      out = if (name of repository) then extend(name, declaration) else create(name, declaration)
+      out = if (name of repository) then extend() else create()
 
     out
 

@@ -462,6 +462,66 @@ module.exports = {
 
 ## Testing
 
+You notice the importance of testing when you have a lot of controllers and models that are decoupled, but must work in synergy.
+Another thing that you notice is that, when you do code like this:
+
+```js
+// we are in app/classes/mystuff.js
+var stuff = require('stuff');
+
+function mystuff(){
+    // use "stuff" inside
+    return stuff({more: 'stuff'}).send();
+};
+
+module.exports = mystuff;
+
+// ----------
+
+// we are in test/mystuff.js
+var mystuff = require('../app/classes/mystuff.js');
+
+describe('mystuff', function(){
+    it('should return a promise', function(){
+        var myStuff = new mystuff();
+        myStuff.stuff // ?! can't spy, mock, stub "stuff", it's not even available
+    });
+});
+```
+
+You cannot test it properly, what if "stuff" is a network module? What if it's a binding or you can't do much with it, like if it uses lenghty timeouts, endless loops or asynchronous code?
+You can't mock, stub, spy on "stuff". That's the importance of dependency injection:
+
+```js
+module.exports = {
+    $deps: [
+        {"stuff": "stuff"}
+    ],
+    construct: function(){
+        // use this.$.stuff
+    }
+};
+```
+
+Now you have access to "stuff" and can mock any of these functions and it's prototype:
+
+```js
+describe('mystuff', function(){
+    it('should return a promise', function(){
+        var stub  = sinon.stub(sx.classes.Mystuff.prototype.stuff, 'timeout', function(){ return; });
+
+        var myNewStuff = new sx.classes.Mystuff();
+
+        expect(); //////
+
+        sx.classes.Mystuff.prototype.stuff.restore();
+    });
+});
+```
+
+All you have to do is remember to restore any modifications you do to the functions, since they are part of your whole application.
+This isn't "Testing 101", it's just showing that everything can be encapsulated along with your classes or modules using dependency injection.
+
 ## Contributing
 
 You may contribute to Socket Express by sending pull requests with proper testing.
