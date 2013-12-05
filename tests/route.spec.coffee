@@ -207,6 +207,8 @@ module.exports =
 
         expect(route.uri(option.params)).to.equal(option.expected)
 
+        route = null
+
     'defaults are not used if param is identical': ->
       route = new Route('(<controller>(/<action>(/<id>)))')
       route.defaults(
@@ -279,6 +281,8 @@ module.exports =
           route.uri(option.uri_array)
         ).to.throwException()
 
+        route = null
+
     'uri fills required uri segments from params': ->
       uri = '<controller>/<action>(/<id>)'
       uri_string1 = 'users/edit'
@@ -298,6 +302,8 @@ module.exports =
       expect(route.uri(uri_array1)).to.equal(uri_string1)
       expect(route.uri(uri_array2)).to.equal(uri_string2)
 
+      route = null
+
     'composing url from route': ->
       options = [
         {
@@ -308,7 +314,7 @@ module.exports =
           params: {'controller': 'news', 'action': 'view', 'id': 42}
         }
         {
-          expected: 'http://kohanaframework.org/news'
+          expected: 'http://example.com/news'
           params: {'controller': 'news'}
           protocol: 'http'
         }
@@ -319,205 +325,195 @@ module.exports =
 
         expect(Route.url('foobar', option.params, option.protocol)).to.equal(option.expected)
 
-###
+    'compile uses custom regex if specified': ->
+      compiled = Route.compile('<controller>(/<action>(/<id>))',
+        {
+          'controller': '[a-z]+',
+          'id': '\\d+'
+        }
+      );
 
-	/**
-	 * Provides test data for test_composing_url_from_route()
-	 * @return array
+      expect(compiled.toString()).to.equal('/^([a-z]+)(?:/([^/.,;?\\n]+)(?:/(\\d+))?)?$/')
 
-	public function provider_composing_url_from_route()
-	{
-		return array(
-			array('/'),
-			array('/news/view/42', array('controller' => 'news', 'action' => 'view', 'id' => 42)),
-			array('http://kohanaframework.org/news', array('controller' => 'news'), 'http')
-		);
-	}
+    'is external route from host': ->
+      Route.set('internal', 'local/test/route').defaults({
+        'controller': 'foo',
+        'action': 'bar'
+      })
 
-	/**
-	 * Tests Route::url()
-	 *
-	 * Checks the url composing from specific route via Route::url() shortcut
-	 *
-	 * @test
-	 * @dataProvider provider_composing_url_from_route
-	 * @param string $expected
-	 * @param array $params
-	 * @param boolean $protocol
+      Route.set('external', 'local/test/route').defaults({
+        'controller': 'foo',
+        'action': 'bar',
+        'host': 'http://example.com'
+      })
 
-	public function test_composing_url_from_route($expected, $params = NULL, $protocol = NULL)
-	{
-		Route::set('foobar', '(<controller>(/<action>(/<id>)))')
-			->defaults(array(
-				'controller' => 'welcome',
-			)
-		);
+      expect(Route.get('internal').isExternal()).to.be(false)
 
-		$this->setEnvironment(array(
-			'_SERVER' => array('HTTP_HOST' => 'kohanaframework.org'),
-			'Kohana::$base_url' => '/',
-			'Kohana::$index_file' => '',
-		));
+      expect(Route.get('external').isExternal()).to.be(true)
 
-		$this->assertSame($expected, Route::url('foobar', $params, $protocol));
-	}
+    'external route includes params in uri': ->
+      options = [
+        {
+          route: '<controller>/<action>',
+          defaults: {
+            'controller'  : 'foo',
+            'action'      : 'bar',
+            'host'        : 'example.com'
+          },
+          expected_uri: 'http://example.com/foo/bar'
+        },
+        {
+          route: '<controller>/<action>',
+          defaults: {
+            'controller'  : 'foo',
+            'action'      : 'bar',
+            'host'        : 'http://example.com'
+          },
+          expected_uri: 'http://example.com/foo/bar'
+        },
+        {
+          route: 'foo/bar',
+          defaults: {
+            'controller'  : 'foo',
+            'host'        : 'http://example.com'
+          },
+          expected_uri: 'http://example.com/foo/bar'
+        },
+      ]
 
-	/**
-	 * Tests Route::compile()
-	 *
-	 * Makes sure that compile will use custom regex if specified
-	 *
-	 * @test
-	 * @covers Route::compile
+      for option in options
+        Route.set('test', option.route).defaults(option.defaults)
 
-	public function test_compile_uses_custom_regex_if_specificed()
-	{
-		$compiled = Route::compile(
-			'<controller>(/<action>(/<id>))',
-			array(
-				'controller' => '[a-z]+',
-				'id' => '\d+',
-			)
-		);
+        expect(Route.get('test').uri()).to.equal(option.expected_uri)
 
-		$this->assertSame('#^(?P<controller>[a-z]+)(?:/(?P<action>[^/.,;?\n]++)(?:/(?P<id>\d+))?)?$#uD', $compiled);
-	}
+    'route filter modify params': ->
+      options = [
+        {
+          route: '<controller>/<action>',
+          defaults: {
+            'controller'  : 'Test',
+            'action'      : 'same',
+          },
+          filter: (params) ->
+            params['action'] = 'modified'
+            params
 
-	/**
-	 * Tests Route::is_external(), ensuring the host can return
-	 * whether internal or external host
+          uri: 'test/different',
+          expected_params: {
+            'controller'  : 'test',
+            'action'      : 'modified',
+          },
+        },
+        {
+          route: '<controller>/<action>',
+          defaults: {
+            'controller'  : 'test',
+            'action'      : 'same',
+          },
+          filter: ->
+            false
+          uri: 'test/fail',
+          expected_params: false,
+        },
+      ]
 
-	public function test_is_external_route_from_host()
-	{
-		// Setup local route
-		Route::set('internal', 'local/test/route')
-			->defaults(array(
-				'controller' => 'foo',
-				'action'     => 'bar'
-				)
-			);
+      for option in options
+        route = new Route(option.route)
 
-		// Setup external route
-		Route::set('external', 'local/test/route')
-			->defaults(array(
-				'controller' => 'foo',
-				'action'     => 'bar',
-				'host'       => 'http://kohanaframework.org'
-				)
-			);
+        req = {
+          path: option.uri
+        }
 
-		// Test internal route
-		$this->assertFalse(Route::get('internal')->is_external());
+        params = route.defaults(option.defaults).filter(option.filter).matches(req)
 
-		// Test external route
-		$this->assertTrue(Route::get('external')->is_external());
-	}
+        expect(params).to.eql(option.expected_params)
 
-	/**
-	 * Provider for test_external_route_includes_params_in_uri
-	 *
-	 * @return array
+        route = null
 
-	public function provider_external_route_includes_params_in_uri()
-	{
-		return array(
-			array(
-				'<controller>/<action>',
-				array(
-					'controller'  => 'foo',
-					'action'      => 'bar',
-					'host'        => 'kohanaframework.org'
-				),
-				'http://kohanaframework.org/foo/bar'
-			),
-			array(
-				'<controller>/<action>',
-				array(
-					'controller'  => 'foo',
-					'action'      => 'bar',
-					'host'        => 'http://kohanaframework.org'
-				),
-				'http://kohanaframework.org/foo/bar'
-			),
-			array(
-				'foo/bar',
-				array(
-					'controller'  => 'foo',
-					'host'        => 'http://kohanaframework.org'
-				),
-				'http://kohanaframework.org/foo/bar'
-			),
-		);
-	}
+    'accepts weird routes': ->
+      options = [
+        {
+          route: 'api-<version>/<cmd>'
+          regex: {
+            'version': '[0-9\\.]{3}',
+            'cmd': '[a-z_]+'
+          }
+          params: {
+            'version': '1.0',
+            'cmd': 'fetch_all'
+          }
+          defaults: {}
+          expected_uri: 'api-1.0/fetch_all'
+        }
+        {
+          route: '/admin/(user/(edit/<id>/)(album/<albumId>/)<session>/)test',
+          regex: null
+          params: {
+            id: 4
+            albumId: 2
+            session: 'qwjdoqiwdasdj12asdiaji198a'
+          }
+          defaults: {}
+          expected_uri: '/admin/user/edit/4/album/2/qwjdoqiwdasdj12asdiaji198a/test'
+        }
+        {
+          route: '/admin/(user/(edit/<id>/)(album/<albumId>/)<session>/)test',
+          regex: null
+          params: {
+            id: 4
+            session: 'qwjdoqiwdasdj12asdiaji198a'
+          }
+          defaults: {}
+          expected_uri: '/admin/user/edit/4/qwjdoqiwdasdj12asdiaji198a/test'
+        }
+        {
+          route: '/admin/(user/(edit/<id>/)(album/<albumId>/)<session>/)test',
+          regex: null
+          params: {
+            albumId: 2
+            session: 'qwjdoqiwdasdj12asdiaji198a'
+          }
+          defaults: {}
+          expected_uri: '/admin/user/album/2/qwjdoqiwdasdj12asdiaji198a/test'
+        }
+        {
+          route: '/admin/(user/(edit/<id>/)(album/<albumId>/)<session>/)test',
+          regex: null
+          params: {}
+          defaults: {}
+          expected_uri: '/admin/test'
+        }
+      ]
 
-	/**
-	 * Tests the external route include route parameters
-	 *
-	 * @dataProvider provider_external_route_includes_params_in_uri
+      for option in options
+        route = new Route(option.route, option.regex)
 
-	public function test_external_route_includes_params_in_uri($route, $defaults, $expected_uri)
-	{
-		Route::set('test', $route)
-			->defaults($defaults);
+        req = {
+          path: option.expected_uri
+        }
 
-		$this->assertSame($expected_uri, Route::get('test')->uri());
-	}
+        route.defaults(option.defaults)
 
-	/**
-	 * Provider for test_route_filter_modify_params
-	 *
-	 * @return array
+        expect(route.matches(req)).to.eql(option.params)
 
-	public function provider_route_filter_modify_params()
-	{
-		return array(
-			array(
-				'<controller>/<action>',
-				array(
-					'controller'  => 'Test',
-					'action'      => 'same',
-				),
-				array('Route_Holder', 'route_filter_modify_params_array'),
-				'test/different',
-				array(
-					'controller'  => 'Test',
-					'action'      => 'modified',
-				),
-			),
-			array(
-				'<controller>/<action>',
-				array(
-					'controller'  => 'test',
-					'action'      => 'same',
-				),
-				array('Route_Holder', 'route_filter_modify_params_false'),
-				'test/fail',
-				FALSE,
-			),
-		);
-	}
+        expect(route.uri(option.params)).to.equal(option.expected_uri)
 
-	/**
-	 * Tests that route filters can modify parameters
-	 *
-	 * @covers Route::filter
-	 * @dataProvider provider_route_filter_modify_params
+        route = null
 
-	public function test_route_filter_modify_params($route, $defaults, $filter, $uri, $expected_params)
-	{
-		$route = new Route($route);
+    'prototype should not be changed': ->
+      route1 = new Route
 
-		// Mock a request class
-		$request = $this->getMock('Request', array('uri'), array($uri));
-		$request->expects($this->any())
-			->method('uri')
-			->will($this->returnValue($uri));
+      filter1 = -> false
+      filter2 = -> ['asdf']
 
-		$params = $route->defaults($defaults)->filter($filter)->matches($request);
+      route1.filter(filter1).defaults({only: 'one'})
 
-		$this->assertSame($expected_params, $params);
-	}
+      route2 = new Route
+      route2.filter(filter2).defaults({not: 'two'})
 
-}
+      expect(route1._filters).to.eql([filter1])
+      expect(route2._filters).to.eql([filter2])
+      expect(route2._defaults).to.eql({not: 'two'})
+      expect(route1._defaults).to.eql({only: 'one'})
 
-###
+      expect(Route::_filters).to.eql([])

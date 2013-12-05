@@ -80,7 +80,7 @@ module.exports = ES5Class.define('sx', {}, ->
 
           data.class.$ = data.class::$ = dependencies
 
-        data.class.setup?()
+        data.class.setup?(@)
 
         switch data.to
           when 'controllers'

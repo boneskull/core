@@ -2,7 +2,6 @@ module.exports = {
   $deps: [
     {'konphyg': 'konphyg'}
   ]
-  $initialize: true
-  construct: ->
+  construct: (path, filename) ->
 
 }

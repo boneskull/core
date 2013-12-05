@@ -1,12 +1,13 @@
-slugg = require 'slugg'
-_s = require 'underscore.string'
-
 module.exports = {
   $singleton: true
-  $deps: ['bootstrap']
+  $deps: [
+    'Bootstrap',
+    {'slugg': 'slugg'},
+    {'_s': 'underscore.string'},
+  ]
 
   title: (name, separator = '-') ->
-    name = slugg(name)
+    name = @$.slugg(name)
 
     if separator isnt '-'
       name.replace(/-/g, separator)
@@ -74,7 +75,7 @@ module.exports = {
 
   site: (uri = '', protocol = null, index = true) ->
     # Chop off possible scheme, host, port, user and pass parts
-    path = _s.trim(uri, '/').replace(/^[-a-z0-9+.]+?:\/\/[^\/]+?\/?/g, '')
+    path = @$._s.trim(uri, '/').replace(/^[-a-z0-9+.]+?:\/\/[^\/]+?\/?/g, '')
 
     if not /^[ -~\t\n\r]+$/.test path
       path = path.replace(
