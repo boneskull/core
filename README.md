@@ -279,6 +279,9 @@ module.exports = {
             this.$.Url
             this.$._s.trim
             this.$.accounting
+        },
+        $setup: function(){ // this is a special function that is called ONCE when this file is required and made into a javascript class
+            this.implement(this.$.accounting, true); // Inherit the prototype of accounting
         }
     }
 }

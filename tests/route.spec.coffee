@@ -305,25 +305,16 @@ module.exports =
       route = null
 
     'composing url from route': ->
-      options = [
-        {
-          expected: '/'
-        }
-        {
-          expected: '/news/view/42'
-          params: {'controller': 'news', 'action': 'view', 'id': 42}
-        }
-        {
-          expected: 'http://example.com/news'
-          params: {'controller': 'news'}
-          protocol: 'http'
-        }
-      ]
 
-      for option in options
-        Route.set('foobar', '(<controller>(/<action>(/<id>)))').defaults('controller': 'welcome')
+      Route.set('foobar', '(<controller>(/<action>(/<id>)))').defaults('controller': 'welcome')
 
-        expect(Route.url('foobar', option.params, option.protocol)).to.equal(option.expected)
+      expect(Route.url('foobar')).to.equal('/')
+
+      expect(Route.url('foobar', {'controller': 'news', 'action': 'view', 'id': 42})).to.equal('/news/view/42')
+
+      Route.$.Url.config.set('domain', 'example.com')
+
+      expect(Route.url('foobar', {'controller': 'news'}, 'https')).to.equal('https://example.com/news')
 
     'compile uses custom regex if specified': ->
       compiled = Route.compile('<controller>(/<action>(/<id>))',

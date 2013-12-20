@@ -53,7 +53,7 @@ module.exports = {
     {'XRegExp': ['xregexp','XRegExp']}
   ]
   $static   : {
-    REGEX_GROUP    : '<([a-zA-Z0-9_]+)>|(?:\\([^()]+\\))+?|(?:\\([^()]+\\)*)+'
+    REGEX_GROUP    : '<([^>]+)>|(?:\\([^(]+\\))+?|(?:\\([^]+\\))+'
     REGEX_SUB      : '\\(([a-zA-Z0-9_/<>()\\-]+)\\)'
     REGEX_SEGMENT  : '[^/.,;?\\n]+'
     REGEX_ESCAPE   : '[#.+*?[^\\]${}=!|]'
@@ -61,10 +61,10 @@ module.exports = {
     defaultAction  : 'index'
     localhosts     : [false, '', 'local', 'localhost']
     routes         : {}
-    setup: ->
+    $setup: ->
       if @$._.isString(@REGEX_GROUP)
         # don't initialize it everytime, cache the XRegExp compilation
-        @REGEX_GROUP = @$.XRegExp(@REGEX_GROUP)
+        @REGEX_GROUP = @$.XRegExp(@REGEX_GROUP, 'g')
 
       if @$._.isString(@REGEX_SUB)
         # don't initialize it everytime, cache the XRegExp compilation
@@ -80,7 +80,7 @@ module.exports = {
       @routes[name]
 
     find: (route) ->
-      if route and route.$instanceOf and not route.$instanceOf(@)
+      if route and (not route instanceof @)
         throw new Error("You must pass in a router to the name function")
 
       for k,v of @routes
@@ -88,15 +88,13 @@ module.exports = {
 
       false
 
-    url: (name, params = {}, protocol) ->
+    url: (name, params = {}, protocol = false, request = null) ->
       route = @get(name)
 
       if route.isExternal()
         route.uri(params)
       else if @$.Url
-        @$.Url.site(route.uri(params), protocol)
-      else
-        throw new Error("Url class dependency not loaded")
+        @$.Url.site(route.uri(params), protocol, request)
 
     compile: (uri, regex = {}) ->
       expression = @$.XRegExp.replace(uri, @REGEX_ESCAPE, '\\\\$0', 'all')
@@ -196,6 +194,10 @@ module.exports = {
     pattern = @$class.REGEX_GROUP
     sub = @$class.REGEX_SUB
 
+    pairs = (str) ->
+      return true if str.indexOf('(') is -1 and str.indexOf(')') is -1
+      str.split(')').length is str.split('(').length and str.indexOf('(') < str.indexOf(')')
+
     compile = (portion, required) =>
       missing = []
 
@@ -219,12 +221,17 @@ module.exports = {
           missing.push param
         else
           # Group, unwrapped
-          match = sub.exec(match)
+          _match = sub.exec(match)
 
-          if match and match[1]
-            _result = compile(match[1], false)
+          if _match?[1]
+            if not pairs(_match[1])
+              _match = sub.exec(portion)
+              if _match?[1]
+                _result = compile(_match[1], false)
+            else
+              _result = compile(_match[1], false)
 
-            if _result[1]
+            if _result?[1] is true
               # This portion is required when it contains a group
               # that is required
               required = true
@@ -258,7 +265,7 @@ module.exports = {
       # Clean up the host and prepend it to the URI
       uri = @$._s.rtrim(host, '/') + '/' + uri
 
-    return uri.replace(/[\(\)]/g, '')
+    return uri.replace(/[()]/g, '')
 
   _filters: []
   _uri: ''

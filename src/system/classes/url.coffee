@@ -1,10 +1,15 @@
 module.exports = {
   $singleton: true
   $deps: [
-    'Bootstrap',
-    {'slugg': 'slugg'},
-    {'_s': 'underscore.string'},
+    'Bootstrap'
+    {'URI': 'URIjs'}
+    {'slugg': 'slugg'}
+    {'_': 'lodash'}
+    {'_s': 'underscore.string'}
   ]
+
+  $setup: ->
+    @config = @$.Bootstrap.config
 
   title: (name, separator = '-') ->
     name = @$.slugg(name)
@@ -14,66 +19,49 @@ module.exports = {
 
     name
 
-  base: (protocol = null, index = false)->
+  base: (protocol = null, index = false, request) ->
     # Start with the configured base URL
-    base_url = '/'
-    ###
+    baseUrl = @config.get('baseUrl')
+    port = @config.get('port')
 
     if protocol is true
-      # Use the initial request to get the protocol
-      protocol = Request.initial
+      # Use the config to get the protocol
+      protocol = @config.get('protocol')
 
-    if (protocol instanceof Request)
-    {
-            if ( ! protocol->secure())
-            {
-                    // Use the current protocol
-                    list(protocol) = explode('/', strtolower(protocol->protocol()));
-            }
-            else
-            {
-                    protocol = 'https';
-            }
-    }
+    if request?.secure?
+      if not request.secure
+        # Use the current protocol
+        [protocol] = request.protocol.toLowerCase()
+      else
+        protocol = 'https'
 
-    if ( ! protocol)
-    {
-            // Use the configured default protocol
-            protocol = parse_url(base_url, PHP_URL_SCHEME);
-    }
+    if not protocol
+      # Use the configured default protocol
+      protocol = @$.URI(baseUrl).protocol() || ''
 
-    if (index === TRUE AND ! empty(Kohana.index_file))
-    {
-            // Add the index file to the URL
-            base_url .= Kohana.index_file.'/';
-    }
+    if index is true and @config.get('indexFile')
+      #Add the index file to the URL
+      baseUrl += "#{@config.get('indexFile')}/"
 
-    if (is_string(protocol))
-    {
-            if (port = parse_url(base_url, PHP_URL_PORT))
-            {
-                    // Found a port, make it usable for the URL
-                    port = ':'.port;
-            }
+    if not @$._.isEmpty(protocol)
 
-            if (domain = parse_url(base_url, PHP_URL_HOST))
-            {
-                    // Remove everything but the path from the URL
-                    base_url = parse_url(base_url, PHP_URL_PATH);
-            }
-            else
-            {
-                    // Attempt to use HTTP_HOST and fallback to SERVER_NAME
-                    domain = isset(_SERVER['HTTP_HOST']) ? _SERVER['HTTP_HOST'] : _SERVER['SERVER_NAME'];
-            }
+      if port = @$.URI(baseUrl).port()
+        #Found a port, make it usable for the URL
+        port = ":#{port}"
 
-            // Add the protocol and domain to the base URL
-            base_url = protocol.'://'.domain.port.base_url;
-    }
-    ###
-    base_url
+      if domain = @$.URI(baseUrl).host()
+        #Remove everything but the path from the URL
+        baseUrl = @$.URI(baseUrl).path()
+      else
+        # Attempt to use HTTP_HOST and fallback to SERVER_NAME
+        domain = request?.host || @config.get('domain')
 
-  site: (uri = '', protocol = null, index = true) ->
+      # Add the protocol and domain to the base URL
+      baseUrl = "#{protocol}://#{domain}#{port}#{baseUrl}"
+
+    baseUrl
+
+  site: (uri = '', protocol = null, index = true, request) ->
     # Chop off possible scheme, host, port, user and pass parts
     path = @$._s.trim(uri, '/').replace(/^[-a-z0-9+.]+?:\/\/[^\/]+?\/?/g, '')
 
@@ -84,5 +72,5 @@ module.exports = {
          encodeURIComponent(match)
       )
 
-    @base(protocol, index) + path
+    @base(protocol, index, request) + path
 }

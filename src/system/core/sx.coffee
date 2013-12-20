@@ -51,6 +51,7 @@ module.exports = ES5Class.define('sx', {}, ->
       return
 
     classes = {}
+    configs = {}
 
     dependencyLoader = (data) =>
       if data.class?
@@ -78,9 +79,9 @@ module.exports = ES5Class.define('sx', {}, ->
             else
               throw new Error(_s.sprintf('$deps for %s must be an array of strings or objects', data.name))
 
-          data.class.$ = data.class::$ = dependencies
+          data.class.implement($: dependencies).include($: dependencies)
 
-        data.class.setup?(@)
+        data.class.$setup?(@)
 
         switch data.to
           when 'controllers'
@@ -94,7 +95,7 @@ module.exports = ES5Class.define('sx', {}, ->
           when 'routes'
             @routes
 
-        if data.class.$initialize?
+        if data.class.$initialize? and not data.class.$singleton?
           @[data.name] = new data.class(data.class.$initialize)
 
     {
@@ -104,7 +105,7 @@ module.exports = ES5Class.define('sx', {}, ->
       controllers: {}
       routes: {}
       models: {}
-      configs: {}
+      configs: configs
       _toPath: (item, type = 'classes') ->
         obj = @[type]
 
@@ -157,6 +158,35 @@ module.exports = ES5Class.define('sx', {}, ->
       factory: Factory(classes, dependencyLoader)
       setPaths: setPaths
       init: init
+      loadConfig: (name, where) ->
+
+        if where is undefined
+          ret = false
+          # unespecific, load in cascade
+          for v in ['system','modules','app']
+            if (_ret = @loadConfig(name, v)) isnt false
+              ret = _ret
+
+          return ret
+        else
+          if where is 'modules'
+          else
+            _path = if where of @paths then path.normalize("#{@paths[where]}config/#{name.toLowerCase()}.js") else false
+
+        if _path and fs.existsSync(_path)
+          declaration = require _path
+          name = _s.classify(name)
+
+          if not configs[name]?
+            configs[name] = classes.Config(name, declaration)
+          else
+            configs[name].set(declaration)
+
+          return configs[name]
+
+        false
+
+
       load: (name, where, to) ->
         _path = false
 

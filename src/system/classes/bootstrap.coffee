@@ -1,7 +1,13 @@
 module.exports = {
   $deps: [
-    'Config'
+    {'_': 'lodash'}
   ]
+
+  $static: {
+    $setup: (sx) ->
+      @config = sx.loadConfig('bootstrap').env(process.env.NODE_ENV || 'development')
+  }
+
   construct: ->
 
 }
