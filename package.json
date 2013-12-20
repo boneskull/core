@@ -89,7 +89,7 @@
     "grunt-contrib-clean": "*",
     "memwatch": "*",
     "sinon": "*",
-    "coffee-script": "*",
+    "coffee-script": "*", 
     "grunt-mocha-test": "0.7.x"
   },
   "optionalDependencies": {
