@@ -22,17 +22,10 @@ module.exports = ES5Class.define('sx', {}, ->
           @load(path.normalize(ext + '/' + file), spath)
         )
 
-      # load system classes
-      loaddir('system', 'classes')
 
-      # load modules
-      #fs.readdirSync()
 
       # load app classes
-      @load('bootstrap')
-
-      #fs.readdirSync()
-
+      #@load('bootstrap')
 
     setPaths = (root) =>
 
@@ -82,18 +75,6 @@ module.exports = ES5Class.define('sx', {}, ->
           data.class.implement($: dependencies).include($: dependencies)
 
         data.class.$setup?(@)
-
-        switch data.to
-          when 'controllers'
-            @controllers
-          when 'modules'
-            @modules
-          when 'models'
-            @models
-          when 'configs'
-            @configs
-          when 'routes'
-            @routes
 
         if data.class.$initialize? and not data.class.$singleton?
           @[data.name] = new data.class(data.class.$initialize)
@@ -177,6 +158,9 @@ module.exports = ES5Class.define('sx', {}, ->
           declaration = require _path
           name = _s.classify(name)
 
+          if _.isFunction(declaration)
+            declaration = declaration(@)
+
           if not configs[name]?
             configs[name] = classes.Config(name, declaration)
           else
@@ -187,7 +171,7 @@ module.exports = ES5Class.define('sx', {}, ->
         false
 
 
-      load: (name, where, to) ->
+      load: (name, where) ->
         _path = false
 
         if where is undefined
@@ -205,7 +189,7 @@ module.exports = ES5Class.define('sx', {}, ->
 
         if _path and fs.existsSync(_path)
           declaration = require _path
-          cls = @factory(name, declaration, to)
+          cls = @factory(name, declaration)
           return cls
 
         false

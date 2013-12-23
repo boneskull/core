@@ -1,6 +1,6 @@
 {
   "name": "socket-express",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "author": "Paulo Cesar",
   "homepage": "http://socketexpress.net",
   "description": "When realtime and stateless HTTP together, live happily ever after. HMVC framework built on top of Primus and Express.js for Node.js, inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone for Node for you)",
@@ -69,12 +69,10 @@
     "colors": "*",
     "connect-redis": "*",
     "connect-mongo": "*",
-    "reversable-router": "1.0.0",
-    "primus": "1.4.x",
-    "exon": "0.0.4",
+    "primus": ">=1.4.0",
     "glob": "*",
-    "xregexp": "~2.0.0",
-    "getobject": "~0.1.0"
+    "xregexp": ">=2.0.0",
+    "getobject": ">=0.1.0"
   },
   "peerDependencies": {
     "bower": "*"

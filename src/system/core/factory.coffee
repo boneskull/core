@@ -8,12 +8,20 @@ _ = require('lodash')
 module.exports = (repository, callback) ->
   'use strict'
 
-  apply = (name, declaration, createdClass, to) ->
+  apply = (name, declaration, createdClass) ->
     extend = []
 
     existing = createdClass?
 
-    createdClass ?= ES5Class.define(name)
+    if declaration.$extend?
+      if repository[declaration.$extend]?
+        createdClass = repository[declaration.$extend].define(name)
+      else if declaration.$extend.$class?
+        createdClass = declaration.$extend.define(name)
+      else
+        createdClass ?= ES5Class.define(name)
+    else
+      createdClass ?= ES5Class.define(name)
 
     if _.isFunction(declaration)
       declaration = declaration.call(createdClass, createdClass.$parent)
@@ -21,11 +29,11 @@ module.exports = (repository, callback) ->
     if existing and createdClass.$singleton
       declaration.$singleton = true
 
-    if declaration.$extend?
+    if declaration.$implement?
 
-      declaration.$extend = [declaration.$extend] if not _.isArray(declaration.$extend)
+      declaration.$implement = [declaration.$implement] if not _.isArray(declaration.$implement)
 
-      for clss in declaration.$extend
+      for clss in declaration.$implement
         if _.isString clss
           if clss of repository
             extend.push repository[clss]
@@ -34,7 +42,7 @@ module.exports = (repository, callback) ->
           extend.push clss
           declaration.$singleton = true if clss.$singleton
 
-      delete declaration.$extend
+      delete declaration.$implement
 
     createdClass.implement extend
 
@@ -68,18 +76,18 @@ module.exports = (repository, callback) ->
     # modify our repository to have our new(?) class
     repository[name] = createdClass
 
-    callback?(class: repository[name], name: name, to: to)
+    callback?(class: repository[name], name: name)
 
     createdClass
 
-  (name, declaration = {}, to) ->
+  (name, declaration = {}) ->
     name = classify(name)
 
     create = () ->
-      apply(name, declaration, null, to)
+      apply(name, declaration, null)
 
     extend = () ->
-      apply(name, declaration, repository[name], to)
+      apply(name, declaration, repository[name])
 
     if arguments.length is 1
       # No parent has been passed, only a 'name' as string

@@ -1,6 +1,7 @@
 module.exports = {
   $deps: [
     {'_': 'lodash'}
+    {'g':'getobject'}
   ]
   construct: (@name, data) ->
     @data = if @$._.isPlainObject(data) then data else {}
@@ -9,10 +10,13 @@ module.exports = {
     @$._.cloneDeep(@data)
 
   set: (name, value) ->
+    if @$._.isArray(name)
+      name = name.join('.')
+
     if name instanceof @$class
       @data = @$._.merge(@data, name.data)
     else if @$._.isString(name)
-      @data[name] = value
+      @$.g.set(@data, name, value)
     else
       @data = @$._.merge(@data, name)
 
@@ -27,8 +31,11 @@ module.exports = {
     @
 
   get: (name, inexistant = null) ->
-    if @data[name]?
-      @data[name]
+    if @$._.isArray(name)
+      name = name.join('.')
+
+    if @$.g.exists(@data, name)
+      @$.g.get(@data, name)
     else
       inexistant
 
@@ -36,7 +43,8 @@ module.exports = {
     typeof(@data[name]) isnt 'undefined'
 
   env: (name) ->
-    return @ if not @data['*']? and not @data[name]?
+    name ?= process.env.NODE_ENV
+    return @ if not @data['*']? and ((not name?) or not (@data[name]?))
     @wipe(@$._.defaults(@data[name], if @data['*']? then @data['*'] else {}))
     @
 

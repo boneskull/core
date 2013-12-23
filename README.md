@@ -88,6 +88,7 @@ must be extended to have a functionality. For example:
 // we are in app/classes/test.js
 module.exports = {
     $extend: 'View', // special definition key that do the magic, it will load the View class and create a new class from it
+                     // $extend creates prototypal inheritance, while $implement is object composition
     execute: function(){
     },
     main: function(){
@@ -164,18 +165,19 @@ sx.Url.implement({
 
 or you want to create a new class from the base of another. Notice the call to the
 `this.$super`, that calls the original `title` function ultra cool your-own `Url` class,
-but still use the provided core `Url` class, use `$extend`.
+but still use the provided core `Url` class, use `$implement`.
+`$implement` adds other classes to your class, but doesn't add any inheritance to them.
 
 ```js
 // we are in `app/classes/cool_url.js`
 module.exports = {
-    $extend: 'Url',
+    $implement: 'Url',
     /*
     these all work the same way
 
-    $extend: ['Url'],
-    $extend: sx.Url,
-    $extend: [sx.Url],
+    $implement: ['Url'],
+    $implement: sx.Url,
+    $implement: [sx.Url],
     */
     tooGood: function(){
 
@@ -225,11 +227,11 @@ Class2 = sx.factory('Class2', {
 });
 
 sx.factory('Class3', {
-    $extend: [Class2]
+    $implement: [Class2]
 });
 
 sx.factory('Class4', {
-    $extend: 'Class3'
+    $implement: 'Class3'
 });
 ```
 
@@ -332,7 +334,7 @@ as a string (core class), CamelCased.
 // we are in app/classes/controller/index.js
 // will be available in sx.controllers.Index
 module.exports = {
-    $extend: 'Controller', // need to explicitly tell which controller to extend
+    $extend: 'Controller', // need to explicitly tell which controller to extend, any changes to the Controller class reflects in this new controller as well
     'actionIndex': function(){
     }
 }
@@ -366,7 +368,7 @@ module.exports = {
 // You can include mixins and base classes as well, changes to original classes
 // won't reflect in the mixin'd class
 module.exports = {
-    $extend: ['Master','ControllerRest'] // effectivelly, we are extending from ControllerTemplate and ControllerREST
+    $implement: ['Master','ControllerRest'] // effectivelly, we are extending from ControllerTemplate and ControllerREST, and mixin their declarations together
     /* ... */
 }
 ```
@@ -374,18 +376,18 @@ module.exports = {
 All controllers from the app are available in `sx.controllers`. Controllers inside folders have their own namespace:
 
 ```js
-console.log(sx.controllers.Index.$render()) // in app/classes/controller/index.js
-console.log(sx.controllers.Admin.Index.$render()) // in app/classes/controller/admin/index.js
-console.log(sx.controller('Admin.Index').$render()); // getter that makes it easier to return a controller using an string
-console.log(sx.controller(['Admin','Index']).$render()); // getter that makes it easier to return a controller using an array
+console.log(sx.controllers.Index.render()) // in app/classes/controller/index.js
+console.log(sx.controllers.Admin.Index.render()) // in app/classes/controller/admin/index.js
+console.log(sx.controller('Admin.Index').render()); // getter that makes it easier to return a controller using an string
+console.log(sx.controller(['Admin','Index']).render()); // getter that makes it easier to return a controller using an array
 ```
 
 Since each module has also their own namespace, they will be available in their respective module:
 
 ```js
-console.log(sx.modules.mymodule.controllers.Index.$render()) // index from the module
-console.log(sx.module('mymodule.controllers.Index').$render()); // getter that makes it easier to return a module using an string
-console.log(sx.module(['mymodule','controllers','Index']).$render()); // getter that makes it easier to return a module using an array
+console.log(sx.modules.mymodule.controllers.Index.render()) // index from the module
+console.log(sx.module('mymodule.controllers.Index').render()); // getter that makes it easier to return a module using an string
+console.log(sx.module(['mymodule','controllers','Index']).render()); // getter that makes it easier to return a module using an array
 ```
 
 ##### Controllers are reached through Routes (which is covered later on).
@@ -397,9 +399,9 @@ console.log(sx.module(['mymodule','controllers','Index']).$render()); // getter 
 Create a module:
 
 1. Create a new folder inside `modules` folder, eg. 'mymodule' or using the command line `sx generate module mymodule`
-2. if you are doing it manually, enable it in `app/config/modules.json` adding `{'mymodule': 'mymodule'}`
+2. if you are doing it manually, enable it in `app/config/modules.js` adding `{'mymodule': 'mymodule'}`
 3. If you need to load additional files, create the file `modules/mymodule/index.js`, and the code inside will be automatically called when the app starts
-4. Place your config inside `modules/mymodule/config/mymodule.json`
+4. Place your config inside `modules/mymodule/config/mymodule.js`
 5. You can call `sx.modules.Mymodule.config` to access the current config, and also, you can access the module namespace using `sx.modules.Mymodule` (views, controllers, models, etc)
 6. You may create routes in your module, and it can be used everywhere. You can also inject globals into views using `sx.View.bindGlobal` or `sx.View.setGlobal` (got jealous of Meteor's `{{loginButton}}`? you can have that as well)
 7. A module folder structure can be exactly as the `app` folder, but the module will be extended by the `app` if you want. eg.
@@ -459,6 +461,110 @@ module.exports = {
 
 ## Config
 
+Configs are loaded the same way the classes are loaded, they are merged from bottom up. The order is `system`, `modules` then `app` folders.
+
+Defining a config file is as simple as:
+
+```js
+// we are in app/config/myconfig.js
+module.exports = {
+  myThing: 1,
+  myOtherThing: 'yes' // etc
+}
+```
+
+Config files are defined as a module because you may set functions and other executable code in it (like when you do in your `routes.js`, where you can define filters).
+
+Every config loaded is placed in `sx.configs` repository. The key is determined by the filename:
+
+```js
+// we are in app/config/my_config.js
+// becomes sx.configs.MyConfig
+module.exports = {
+  myconfig: true
+}
+// you can read it as sx.configs.MyConfig.get('myconfig') or sx.configs.MyConfig.data.myconfig (if you are concerned about performence on using a getter)
+```
+
+Another thing is that you can use nested rules and still be able to access them using the `get` function:
+
+```js
+// we are in app/config/myconfig.js
+module.exports = {
+  my: {
+    deep: {
+      property: true
+    }
+  }
+}
+// can be accessed using sx.configs.Myconfig.get('my.deep.property') or sx.configs.Myconfig.get(['my','deep','property'])
+// the same goes for "set"
+```
+
+If you, instead of exporting an object, you pass in a function, the function will be executed, and the first parameter will be the `sx` instance, so you can access other configs and classes from your config (not usually necessary):
+
+```js
+module.exports = function(sx){
+  return { // you must return your object definition
+      existingConfig: sx.configs.OtherClass,
+      myThing: 1,
+      myOtherThing: 'yes' // etc
+  };
+}
+```
+
+The config turns into a `Config` class that has a couple of functions to manipulate your settings:
+
+##### Config.clone()
+
+clone your data
+
+##### Config.set(key, value)
+
+set values on your config. can pass in `'key', 'value'`, or an object with `{'key':'value'}`.
+Existing values will be overwritten.
+
+##### Config.wipe()
+
+either wipe your data, or exchange it if you pass in another object
+
+##### Config.unset(name)
+
+deletes a key on your config
+
+##### Config.get(name, inexistant)
+
+returns the value of the `name` if it exists, or the `inexistant` value. Eg.: `Config.get('dontexist', 'boo')` returns `'boo'`
+
+##### Config.isset(name)
+
+checks if a key is set (it can be null, false or zero, but not undefined)
+
+##### Config.env(name)
+
+you may have a setting for each environment, and the Config makes it easy to set which environment it should use.
+You define your config file like this:
+
+```js
+module.exports = {
+    '*': { // the "star" means a common definition that should exist in any cases below
+      value1: 1,
+      value2: 2
+    }
+    'development': { // value1 will have it's value overwritten if you set Config.env('development') and set to 0, and 'staging' and 'production' will be deleted
+      value1: 0
+    },
+    'staging': { // value1 will have it's value overwritten if you set Config.env('staging') and set to 3, and 'production' and 'development' will be deleted
+      value1: 3
+    },
+    'production': { // value1 will have it's value overwritten if you set Config.env('production') and set to 5, and 'staging' and 'development' will be deleted
+      value1: 5
+    }
+}
+```
+
+If you call it `Config.env()` (without a name), it will try to use the `process.env.NODE_ENV`, and the other definitions will be deleted (including the `*` and will be merged in one config).
+
 ## Views
 
 ## Models
@@ -515,7 +621,7 @@ describe('mystuff', function(){
 
         var myNewStuff = new sx.classes.Mystuff();
 
-        expect(); //////
+        /* test it */
 
         sx.classes.Mystuff.prototype.stuff.restore();
     });

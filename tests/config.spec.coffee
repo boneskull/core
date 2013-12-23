@@ -91,3 +91,15 @@ module.exports =
 
       expect(config.data).to.eql({})
 
+    'get works with arrays or dots': ->
+      config = Config('deep', deep: array: like: object: 'true')
+
+      expect(config.get('deep.array.like.object')).to.be('true')
+      expect(config.get(['deep','array','like','object'])).to.be('true')
+
+    'set works with arrays or dots': ->
+      config = Config('deep set')
+
+      expect(config.set('deep.array.like.object', 'true').data).to.eql(deep: array: like: object: 'true')
+      expect(config.set(['deep','array','like','object'], 'false').data).to.eql(deep: array: like: object: 'false')
+
