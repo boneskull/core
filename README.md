@@ -4,15 +4,30 @@ Socket Express (SX for short)
 =============
 
 When realtime and stateless HTTP get together, and live happily ever after.
-HMVC (Hierarchical model–view–controller) framework built on top of [Primus](https://github.com/primus/primus) and [Express.js](https://github.com/visionmedia/express) for [Node.js](http://nodejs.org),
-inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone/port for Node for you)
+HMVC (Hierarchical model–view–controller) framework built on top of [Primus](https://github.com/primus/primus) and [Express.js](https://github.com/visionmedia/express) (that might change to [Koa](https://github.com/koajs/koa) in near future when generators arrive to node stable) for [Node.js](http://nodejs.org),
+inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone/port for Node for you), using _almost_ nothing more than already existing packages in NPM but with some consistent, maintainable, _cascading "class-based" Javascript_ glue together.
 
-Using _almost_ nothing more than already existing packages in NPM but with some consistent, maintainable, _cascading class-based Javascript_ glue together.
+Highlights
+=============
+
+* No DSL
+* No new jargon to learn
+* Built around the _Repository Pattern_, _Dependency Injection Pattern_ and based on _Pub/Sub_ for events (through `postal.js`)
+* Plain Javascript (or Coffeescript if you fancy that, the source of sx itself is written in Coffeescript)
+* Nothing is enforced, you only need to follow folder structure, place the files where they belong, and you are set
+* Convention over configuration
+* Everything are _classes_ that you can extend to override behavior or add functionality, but favoring _Object Composition_ over _Class Inheritance_ in most cases (changing base classes don't change subsequent classes and perform faster)
+* There's only one sexy global namespace that rhymes: `sx`
+* No nested _callback hell_, almost everywhere you can use Q Promises library
+* Ready for node 0.8, 0.10 and 0.11
+* Intuitive naming for core classes, minimizing the need to keep going to the documentation to understand
+* Free from _require hell_, using some magic through convention and loading mechanisms through automated dependency injection
+* Focused on tests (testing and testability), it's really easy to test, `modules`, `controllers`, `views`, `models`, it's always available through your entire app
 
 Install
 =============
 
-```
+```bash
 $ npm install socket-express -g
 ```
 
@@ -36,23 +51,6 @@ $ sx update
 
 It will update the Socket Express system folder and dependencies
 
-Highlights
-=============
-
-* No DSL
-* No new jargon to learn
-* Built around the _Repository Pattern_, _Dependency Injection Pattern_ and based on _Pub/Sub_ for events (through `postal.js`)
-* Plain Javascript (or Coffeescript if you fancy that, the source is in Coffeescript)
-* Nothing is enforced, you only need to follow folder structure and don't clutter the global namespace
-* Convention over configuration
-* Everything are _classes_ that you can extend to override behavior or add functionality, but favoring _Object Composition_ over _Class Inheritance_
-* There's only one sexy global namespace that rhymes: `sx`
-* No nested _callback hell_, almost everywhere you can use Promises/Futures and Async library
-* Ready for node 0.8, 0.10 and 0.11
-* Intuitive naming for classes, minimizing the need to keep going to the documentation to understand
-* Free from _require hell_, using some magic through convention and loading mechanisms through dependency injection
-* Focused on tests, testing and testability, it's really easy to test, `modules`, `controllers`, `views`, `models`, it's always available through your entire app
-
 App load order
 =============
 
@@ -67,7 +65,7 @@ Files are loaded from the folders in this order: `system`, then `modules` then `
 Conventions
 =============
 
-## Cascading file system (CFS) and Factory
+## Cascading file system (CFS), Factory and Repositories
 
 Most of the time you'll want to create your own classes, or extend the core classes using the `sx.factory` method,
 this is what makes your classes and code be available in your entire app, without needing to use `require` or
@@ -169,7 +167,7 @@ but still use the provided core `Url` class, use `$implement`.
 `$implement` adds other classes to your class, but doesn't add any inheritance to them.
 
 ```js
-// we are in `app/classes/cool_url.js`
+// we are in app/classes/cool_url.js
 module.exports = {
     $implement: 'Url',
     /*
@@ -194,6 +192,59 @@ var myUrl = sx.classes.Url.create('myUrl'); // trying to instantiate the Url cla
 
 typeof myUrl.title // undefined
 typeof sx.Url.title // function
+```
+
+Below is an useful example.
+Take it that you don't like using [forms](https://github.com/caolan/forms) module for validation in the `Form` class, for example.
+Instead, you really want to use [validator](https://github.com/chriso/node-validator):
+
+```js
+// create the file in app/classes/form.js
+module.exports = {
+    $deps: [
+        {'validator': 'validator'} // require validator
+    ]
+    $setup: function(){
+        // we want to configure validator as per docs
+        var Validator = this.$.validator.Validator;
+
+        Validator.prototype.error = function (msg) {
+            this._errors.push(msg);
+            return this;
+        }
+
+        Validator.prototype.getErrors = function () {
+            return this._errors;
+        }
+    },
+    validate: function(request, rules) {
+        // let's just ignore the original code for create and do our own called sx.Form.validate(req, {rules})
+        // keep it civilized by using promises, will ya?
+
+        // overwrites the original validate, that instead of form, take rules object
+
+        var
+            validator = new this.$.validator.Validator(), errors = [],
+            d = this.$.Q.defer();
+
+        for(var field in rules){
+            // rules is an object comprised of {nameOfField: {ruleType: [args]}}
+            var check = validator.check(request.param(field)); // undefineds will issue an error
+            for (var rule in rules[field]) {
+                // rules[field] is an object comprised of {ruleType: [args], ruleType2: [args]}
+                check[rule].apply(validator, rules[field][rule]);
+            }
+        }
+
+        if (errors = validator.getErrors()) {
+            d.reject(errors, validator);
+        } else {
+            d.resolve(validator);
+        }
+
+        return d.promise;
+    }
+}
 ```
 
 ##### To create your own helpers and classes, use `sx.factory`
@@ -323,8 +374,7 @@ Your controllers go into `app/classes/controller/`, with a lowercase filename, a
 
 * `Controller`: A controller that does nothing at first, only respond to routes, you decide what it should return
 * `ControllerTemplate`: A controller that automatically render content inside the 'content' var in the template
-* `ControllerJson`: A controller that automatically return JSON data with proper headers
-* `ControllerRest`: A regular controller that responds to REST commands (DELETE, PUT, POST, GET)
+* `ControllerRest`: A regular controller that responds to REST commands (DELETE, PUT, POST, GET, that maps to destroy, create, update and get)
 * `ControllerRealtime`: A realtime controller that uses Primus to push updates to the browser using Websockets (when available)
 * `ControllerAjax`: A controller that can respond to AJAX requests automatically
 
@@ -368,7 +418,7 @@ module.exports = {
 // You can include mixins and base classes as well, changes to original classes
 // won't reflect in the mixin'd class
 module.exports = {
-    $implement: ['Master','ControllerRest'] // effectivelly, we are extending from ControllerTemplate and ControllerREST, and mixin their declarations together
+    $implement: ['Master','ControllerRest'] // effectivelly, we are extending from ControllerTemplate and ControllerRest, and mixin their declarations together
     /* ... */
 }
 ```
@@ -389,6 +439,8 @@ console.log(sx.modules.mymodule.controllers.Index.render()) // index from the mo
 console.log(sx.module('mymodule.controllers.Index').render()); // getter that makes it easier to return a module using an string
 console.log(sx.module(['mymodule','controllers','Index']).render()); // getter that makes it easier to return a module using an array
 ```
+
+NOTE: Controllers of same name are overwritten (controllers don't extend each other, you must explicitly extend them)
 
 ##### Controllers are reached through Routes (which is covered later on).
 
@@ -569,6 +621,155 @@ If you call it `Config.env()` (without a name), it will try to use the `process.
 
 ## Models
 
+Models in SX are merely a wrapper for the [jugglingdb](https://github.com/1602/jugglingdb) module, with some "promises" sauce.
+Every callback that you would do in jugglingdb becomes a promise:
+
+First your define your model:
+
+```js
+// we are in app/classes/models/user.js, accessible in sx.models.User
+module.exports = {
+    $deps: [ // can use deps like any other class
+        'model/Rights'
+    ],
+    $static: {
+        // can also define static functions like any other class
+    },
+    $extend: 'Model', // must extend 'Model' or any derivatives
+    $db: 'mongodb', // If not provided, it will be set to 'memory'
+    $attrs: function(deferred){
+        // the context (this) is the newly created model class (aka, this very own class, not the jugglingdb model!)
+
+        // to access the jugglingdb model, use the deferred callback:
+        deferred(function(model){
+            // this function is intended to fine grain, patch, change, the created schema
+
+            // this is called **ONCE** on app startup
+
+            // its executed after the model was initialized with the schema below, it's a "promise resolve" callback
+            // the context (this) is the same as the $attrs context
+
+            model.validatesPresenceOf('name');
+
+            model.prototype.getStatus = function(){
+               return this.name + ': ' + (this.married ? 'Married': 'Single');
+            };
+
+            model.prototype.marry = function(date){
+                this.married = true;
+                this.extra = 'Married in ' + date;
+            };
+
+            model.prototype.isActive = function(){
+                if (this.role !== 1) {
+                    return this.active;
+                }
+                return false;
+            };
+
+            // You can also ensure the load of the needed model by using sx.model('Rights')
+            // or this.Schema.models.Rights or sx.models.Rights, but those might not have been loaded yet,
+            // so using $deps is the prefered way
+
+            model.belongsTo(sx.model('Rights'), {as: 'right', foreignKey: 'userId'});
+            model.hasMany(this.$.Rights, {as: 'rights', foreignKey: 'userId'}]);
+            model.hasAndBelongsToMany('rights');
+        });
+
+        return {
+            name: String,
+            gender: String,
+            married: Boolean,
+            age: {type: Number, index: true},
+            dob: Date,
+            extra: this.Schema.Text, // special type Text
+            createdAt: {type: Number, default: Date.now}
+        };
+    }
+};
+```
+
+```js
+// the model can be over simplified:
+module.exports = {
+    $extend: 'Model',
+    $db: 'redis', // if you don't specify this, it will be "memory"
+    $attrs: {
+        name: String,
+        active: Boolean,
+        role: Number
+    },
+    $functions: {
+        isActive: function(){
+            if (this.role !== 1) {
+                return this.active;
+            }
+            return false;
+        }
+    },
+    $relations: {
+        hasMany: 'Configs', // string = simple
+        hasMany: ['Posts', {model: 'article'}], // array = elaborated
+        //belongsTo: 'Admin', // model = Admin
+        //hasAndBelongsToMany: 'Groups' // model = Group
+    }
+};
+```
+
+Then you use it in your controller (or other models):
+
+```js
+// we are in app/classes/controller/user.js
+// those are reached through HTTP verbs
+module.exports = {
+    $deps: [
+        'model/User'
+    ],
+    $extend: 'ControllerRest',
+    find: function(req, res){ // GET, in this case, GET localhost/user(/1?)
+        // or sx.models.User or sx.model('User')
+        if (req.param('id')) {
+            this.$.User.find(req.param('id')).then(function(user){
+                if (user.isActive()) {
+                    res.json(user);
+                } else {
+                    res.json({error: error});
+                }
+            }, function(error){
+                res.json({error: error});
+            });
+        } else {
+            this.$.User.all({where: {active: true}}).then(function(users){
+                res.json(users);
+            });
+        }
+    },
+    update: function(req, res){ // POST, in this case, POST localhost/user/1
+        // or sx.models.User or sx.model('User')
+        this.$.User.find(req.param('id')).then(function(user){
+            return user.updateAttributes(req.params);
+        }, function(err){
+            res.json({error: err});
+        })
+        .then(function(user){
+            res.json(user);
+        });
+    },
+    insert: function(req, res){ // PUT, in this case, PUT localhost/user
+        var user = this.$.User.createNew(req.params);
+
+        user.save().then(function(){
+            res.json(true);
+        }, function(){
+            res.json(false);
+        });
+    },
+    destroy: function(req, res){
+
+    }
+};
+```
+
 ## Testing
 
 You notice the importance of testing when you have a lot of controllers and models that are decoupled, but must work in synergy.
@@ -617,13 +818,13 @@ Now you have access to "stuff" and can mock any of these functions and it's prot
 ```js
 describe('mystuff', function(){
     it('should return a promise', function(){
-        var stub  = sinon.stub(sx.classes.Mystuff.prototype.stuff, 'timeout', function(){ return; });
+        var stub  = sinon.stub(sx.classes.Mystuff.$.stuff, 'timeout', function(){ return; });
 
         var myNewStuff = new sx.classes.Mystuff();
 
         /* test it */
 
-        sx.classes.Mystuff.prototype.stuff.restore();
+        sx.classes.Mystuff.$.restore();
     });
 });
 ```
@@ -631,7 +832,99 @@ describe('mystuff', function(){
 All you have to do is remember to restore any modifications you do to the functions, since they are part of your whole application.
 This isn't "Testing 101", it's just showing that everything can be encapsulated along with your classes or modules using dependency injection.
 
-## Contributing
+When testing controllers, you can load a controller on-the-fly by calling `sx.controller('yourcontroller')` and you may instantiate it at will
+
+```js
+define('Home control', function(){
+    it('should return a valid json', function(){
+        var HomeCtrl = new sx.controller('home');
+        var User = sx.model('user');
+
+        var req = {params: {id: '1'}};
+        var after = sinon.spy(HomeCtrl, 'after');
+        var findOne = sinon.spy(User, 'findOne');
+
+        var res = sinon.stub({
+            json: function(){}
+        });
+
+        HomeCtrl.execute(req, res);
+
+        expect(res.json.args[0][0]).to.eql({username: 'joe', password: '...'});
+        expect(after.called).to.be(true);
+        expect(findOne.called).to.be(true);
+
+        // Also, if you done any dependency injection on your controller, you may access it through
+        // HomeCtrl.$.yourClass
+        after.reset();
+        res.json.reset();
+
+        req.params.id = 'invalid';
+
+        expect(function(){
+            HomeCtrl.execute(req, res);
+        }).to.throwException();
+
+        expect(after.called).to.be(false);
+    });
+});
+```
+
+
+## FAQ (semi-srsly)
+
+##### What kind of black magic does SX offer me?
+
+It loads all your "classes" when your app starts, applies the config to each class that needs a config, and glue your routes to your controllers automagically.
+The assets, usually images, css, client-side javascript are entirely up to you (and your task runner \[like Grunt\]), it's advised to use NGINX (for example), to deal with your assets though, express isn't up par to its performance
+You can get away with an working app in a couple of minutes with minimal configuration.
+
+##### Why the dollar ($) signs everywhere?
+
+Mainly to avoid collisions with your own functions, plus, when you see a function with a leading $, you can almost assure it's a definition
+from the framework.
+
+##### What if I want to move to another framework? Isn't my code tied to SX?
+
+Nope, hardly. Since everything (controllers, configs, routes, etc) is a module, and prefer to use dependency injection instead of using globals,
+you can easily port over most of the code with minimal refactoring. Isn't this just "counter-advertising" _(?)_ to sx? Not in my book.
+
+##### Where do I put my Express middleware?
+
+Usually inside `$setup` in `$static`, since it's automatically executed when the class is loaded:
+
+```js
+// for example, in app/classes/myuses.js
+module.exports = {
+    $static: {
+        use1: function(req, res, next) {
+            next();
+        },
+        use2: function(req, res, next) {
+            next();
+        },
+        $setup: function(sx){
+            sx.app.use(this.use1);
+            sx.app.use(this.use2);
+        }
+    }
+}
+```
+
+But nothing stops you to go full sloppycode mode and do:
+
+```js
+sx.app.use(function(req, res, next){
+    // I can't be tested, ever \o/
+});
+```
+
+##### But, but... writing code like that is a pain in the ass, I want an app full of globals, I never test my code and I hate conventions
+
+That's not a question, but fret not, sir/madam. There are a plethora of other 'frameworks' that allow you to write sloppycode and
+unmaintainable code for smaller _(?)_ projects! You got that base covered.
+
+##### How can I contribute?
 
 You may contribute to Socket Express by sending pull requests with proper testing.
 Always create a new branch on your github repo for your feature before issuing a pull request.
@@ -641,7 +934,7 @@ License
 
 The MIT License (MIT)
 
-Copyright © 2013 Paulo Cesar http://socketexpress.net/
+Copyright © 2013-2014 Paulo Cesar http://socketexpress.net/
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

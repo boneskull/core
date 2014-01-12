@@ -1,74 +1,31 @@
-str_replace = (search, replace, subject, count) ->
-  ###
-  // http://kevin.vanzonneveld.net
-  // +   original by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-  // +   improved by: Gabriel Paderni
-  // +   improved by: Philip Peterson
-  // +   improved by: Simon Willison (http://simonwillison.net)
-  // +    revised by: Jonas Raoni Soares Silva (http://www.jsfromhell.com)
-  // +   bugfixed by: Anton Ongson
-  // +      input by: Onno Marsman
-  // +   improved by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-  // +    tweaked by: Onno Marsman
-  // +      input by: Brett Zamir (http://brett-zamir.me)
-  // +   bugfixed by: Kevin van Zonneveld (http://kevin.vanzonneveld.net)
-  // +   input by: Oleg Eremeev
-  // +   improved by: Brett Zamir (http://brett-zamir.me)
-  // +   bugfixed by: Oleg Eremeev
-  // %          note 1: The count parameter must be passed as a string in order
-  // %          note 1:  to find a global variable in which the result will be given
-  // *     example 1: str_replace(' ', '.', 'Kevin van Zonneveld');
-  // *     returns 1: 'Kevin.van.Zonneveld'
-  // *     example 2: str_replace(['{name}', 'l'], ['hello', 'm'], '{name}, lars');
-  // *     returns 2: 'hemmo, mars'
-  ###
-  j = 0
-  temp = ''
-  repl = ''
-  f = [].concat(search)
-  r = [].concat(replace)
-  s = subject
-  ra = Object::toString.call(r) is '[object Array]'
-  sa = Object::toString.call(s) is '[object Array]'
-  s = [].concat(s)
-
-  @window[count] = 0 if count
-
-  for i,v of s
-    continue if not s[i]
-    for j,v of f
-      temp = s[i] + ''
-      repl = (if ra then ((if r[j] isnt `undefined` then r[j] else "")) else r[0])
-      s[i] = temp.split(f[j]).join(repl)
-
-      @window[count] += (temp.length - s[i].length) / f[j].length if count and s[i] isnt temp
-
-  if sa then s else s[0]
-
 module.exports = {
   $deps: [
-    'Url',
-    {'_s': 'underscore.string'},
-    {'_' : 'lodash'},
+    'Url'
+    'Utils'
+    {'_s': 'underscore.string'}
     {'XRegExp': ['xregexp','XRegExp']}
   ]
   $static   : {
     REGEX_GROUP    : '<([^>]+)>|(?:\\([^(]+\\))+?|(?:\\([^]+\\))+'
-    REGEX_SUB      : '\\(([a-zA-Z0-9_/<>()\\-]+)\\)'
-    REGEX_SEGMENT  : '[^/.,;?\\n]+'
-    REGEX_ESCAPE   : '[#.+*?[^\\]${}=!|]'
+    REGEX_SUB      : '\\(([a-zA-Z0-9_\\/<>\\(\\)\\-\\.]+)\\)'
+    REGEX_SEGMENT  : '[^\\/\\.,;\\?\\n]+'
+    REGEX_ESCAPE   : '[\\/\\#\\.\\+\\*\\?\\[\\^\\]\\$\\{\\}\\=\\!\\|]+'
     defaultProtocol: 'http://'
     defaultAction  : 'index'
     localhosts     : [false, '', 'local', 'localhost']
     routes         : {}
     $setup: ->
-      if @$._.isString(@REGEX_GROUP)
+      if @$.Utils.isString(@REGEX_GROUP)
         # don't initialize it everytime, cache the XRegExp compilation
         @REGEX_GROUP = @$.XRegExp(@REGEX_GROUP, 'g')
 
-      if @$._.isString(@REGEX_SUB)
+      if @$.Utils.isString(@REGEX_SUB)
         # don't initialize it everytime, cache the XRegExp compilation
         @REGEX_SUB = @$.XRegExp(@REGEX_SUB)
+
+      if @$.Utils.isString(@REGEX_ESCAPE)
+        # don't initialize it everytime, cache the XRegExp compilation
+        @REGEX_ESCAPE = @$.XRegExp(@REGEX_ESCAPE, 'g')
 
     set            : (name, uri, regex) ->
       @routes[name] = new @(uri, regex)
@@ -97,14 +54,14 @@ module.exports = {
         @$.Url.site(route.uri(params), protocol, request)
 
     compile: (uri, regex = {}) ->
-      expression = @$.XRegExp.replace(uri, @REGEX_ESCAPE, '\\\\$0', 'all')
+      expression = @$.XRegExp.replace(uri, @REGEX_ESCAPE, '\\$&', 'all')
 
       if expression.indexOf('(') isnt -1
-        expression = str_replace(['(',')'], ['(',')?'], expression)
+        expression = @$.Utils.strReplace(['(',')'], ['(',')?'], expression)
 
-      expression = str_replace(['<','>'], ['(?<','>' + @REGEX_SEGMENT + ')'], expression)
+      expression = @$.Utils.strReplace(['<','>'], ['(?<','>' + @REGEX_SEGMENT + ')'], expression)
 
-      if @$._.size(regex)
+      if @$.Utils.size(regex)
 
         search = []
         replace = []
@@ -113,7 +70,7 @@ module.exports = {
           search.push("<#{key}>#{@REGEX_SEGMENT}")
           replace.push("<#{key}>#{value}")
 
-        expression = str_replace(search, replace, expression)
+        expression = @$.Utils.strReplace(search, replace, expression)
 
       @$.XRegExp('^' + expression + '$', 'nx')
   },
@@ -135,7 +92,7 @@ module.exports = {
     @
 
 	filter: (callback) ->
-    if not @$._.isFunction(callback)
+    if not @$.Utils.isFunction(callback)
       throw new Error('Invalid Route.filter specified, it must be a function')
 
     @_filters = [].concat(@_filters, callback)
@@ -164,10 +121,10 @@ module.exports = {
         # Set default values for any key that was not matched
         params[key] = value
 
-    if not @$._.isEmpty(params['controller'])
+    if not @$.Utils.isEmpty(params['controller'])
       params['controller'] = params['controller'].toLowerCase()
 
-    if not @$._.isEmpty(params['directory'])
+    if not @$.Utils.isEmpty(params['directory'])
       params['directory'] = params['directory'].toLowerCase()
 
     if @_filters
@@ -178,7 +135,7 @@ module.exports = {
         if _return is false
           # Filter has aborted the match
           return false
-        else if @$._.isArray(_return)
+        else if @$.Utils.isArray(_return)
           # Filter has modified the parameters
           params = _return
 
@@ -208,7 +165,7 @@ module.exports = {
           if params[param] isnt undefined
             # This portion is required when a specified
             # parameter does not match the default
-            required = (required or @$._.isEmpty(defaults[param]) or params[param] isnt defaults[param])
+            required = (required or @$.Utils.isEmpty(defaults[param]) or params[param] isnt defaults[param])
 
             # Add specified parameter to this result
             return params[param]
@@ -265,7 +222,7 @@ module.exports = {
       # Clean up the host and prepend it to the URI
       uri = @$._s.rtrim(host, '/') + '/' + uri
 
-    return uri.replace(/[()]/g, '')
+    return uri
 
   _filters: []
   _uri: ''

@@ -5,9 +5,12 @@ module.exports = {
 
   $static: {
     $setup: (sx) ->
-      @config = sx.loadConfig('bootstrap').env(process.env.NODE_ENV || 'development')
+      @config = sx.config('bootstrap').env(process.env.NODE_ENV || 'development')
+
+      return
   }
 
-  construct: ->
+  construct: (config) ->
+
 
 }

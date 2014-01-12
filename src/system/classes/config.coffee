@@ -10,6 +10,8 @@ module.exports = {
     @$._.cloneDeep(@data)
 
   set: (name, value) ->
+    return @ if not name
+
     if @$._.isArray(name)
       name = name.join('.')
 
@@ -26,11 +28,13 @@ module.exports = {
     @data = data
 
   unset: (name) ->
-    if @data[name]?
+    if name? and @data[name]?
       delete @data[name]
     @
 
   get: (name, inexistant = null) ->
+    return inexistant if not name
+
     if @$._.isArray(name)
       name = name.join('.')
 
@@ -44,8 +48,10 @@ module.exports = {
 
   env: (name) ->
     name ?= process.env.NODE_ENV
-    return @ if not @data['*']? and ((not name?) or not (@data[name]?))
-    @wipe(@$._.defaults(@data[name], if @data['*']? then @data['*'] else {}))
+    return @ if not @data['*']? or ((not name?) or not (@data[name]?))
+
+    @wipe(@$._.merge(@data['*'], @data[name]))
+
     @
 
 }

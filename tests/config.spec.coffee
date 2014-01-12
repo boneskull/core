@@ -103,3 +103,28 @@ module.exports =
       expect(config.set('deep.array.like.object', 'true').data).to.eql(deep: array: like: object: 'true')
       expect(config.set(['deep','array','like','object'], 'false').data).to.eql(deep: array: like: object: 'false')
 
+    'star env': ->
+      data = {
+        '*': {
+          'this': {
+            'is': 'sparta'
+            some: deep: 'property'
+          }
+        },
+        'test': {
+          'this': {
+            'isnt': 'sparta'
+            'is': 'persia'
+            'some': 'deep': 'item'
+          }
+        }
+      }
+
+      config = Config('env', data)
+
+      expect(config.data).to.eql(data)
+
+      expect(config.env('dont exists').data).to.eql(data)
+
+      expect(config.env('test').data).to.eql({ 'this': { 'is': 'persia', 'isnt': 'sparta', 'some': 'deep': 'item' }})
+

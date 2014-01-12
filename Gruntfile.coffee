@@ -51,9 +51,7 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-mocha-test'
   grunt.loadNpmTasks 'grunt-contrib-clean'
 
-  grunt.registerTask 'test', ['coffee:compile','mochaTest:test']
-
-  grunt.registerTask 'build', ['coffee', 'test']
+  grunt.registerTask 'build', ['coffee:compile','mochaTest:test']
   grunt.registerTask 'releaseit', release
 
   grunt.registerTask 'default', ['watch']

@@ -324,7 +324,7 @@ module.exports =
         }
       );
 
-      expect(compiled.toString()).to.equal('/^([a-z]+)(?:/([^/.,;?\\n]+)(?:/(\\d+))?)?$/')
+      expect(compiled.toString()).to.equal('/^([a-z]+)(?:\\/([^\\/\\.,;\\?\\n]+)(?:\\/(\\d+))?)?$/')
 
     'is external route from host': ->
       Route.set('internal', 'local/test/route').defaults({
@@ -473,6 +473,31 @@ module.exports =
           params: {}
           defaults: {}
           expected_uri: '/admin/test'
+        }
+        {
+          route: '/site/int/en(/<controller>-(<action>_(<id>)).html)',
+          regex: null
+          params: {
+            controller: 'after'
+            action: 'taste'
+            id: 'raw'
+          }
+          defaults: {}
+          expected_uri: '/site/int/en/after-taste_raw.html'
+        }
+        {
+          route: '/api/<version>/<command>(.<format>)',
+          regex: {
+            version: '[1-3]{1}'
+            format: '(json|xml)'
+          }
+          params: {
+            version: '1'
+            command: 'users'
+            format: 'json'
+          }
+          defaults: {}
+          expected_uri: '/api/1/users.json'
         }
       ]
 

@@ -1,4 +1,7 @@
 module.exports = {
-  actionIndex: ->
-    'Hello world'
+  $extend: 'Controller'
+  actionIndex: (req, res) ->
+    res.send('Hello world!')
+
+    return
 }

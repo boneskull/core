@@ -1,5 +1,4 @@
 # add the created classes in repository
-# publishes to channel the topic 'class.created'
 
 ES5Class = require('es5class')
 _s = require('underscore.string')
@@ -14,14 +13,16 @@ module.exports = (repository, callback) ->
     existing = createdClass?
 
     if declaration.$extend?
-      if repository[declaration.$extend]?
-        createdClass = repository[declaration.$extend].define(name)
-      else if declaration.$extend.$class?
-        createdClass = declaration.$extend.define(name)
+      if declaration.$extend.$class?
+        createdClass = declaration.$extend.$define(name)
+      else if callback? and loaded = callback(null, declaration.$extend)
+        createdClass = loaded.$define(name)
+      else if repository[declaration.$extend]?
+        createdClass = repository[declaration.$extend].$define(name)
       else
-        createdClass ?= ES5Class.define(name)
+        createdClass = ES5Class.$define(name)
     else
-      createdClass ?= ES5Class.define(name)
+      createdClass ?= ES5Class.$define(name)
 
     if _.isFunction(declaration)
       declaration = declaration.call(createdClass, createdClass.$parent)
@@ -48,18 +49,18 @@ module.exports = (repository, callback) ->
 
     if declaration.$static
       # always go to base function instead of prototype
-      createdClass.implement(declaration.$static)
+      createdClass.$implement(declaration.$static)
       delete declaration.$static
 
     if declaration.$deps
-      # convert any abnormal dependency name to a proper CamelCase
+      # convert any folders to an array
       for k,v of declaration.$deps
-        if _.isString(declaration.$deps[k])
-          declaration.$deps[k] = classify(v)
+        if _.isString(declaration.$deps[k]) and declaration.$deps[k].indexOf('/')
+          declaration.$deps[k] = declaration.$deps[k].split(/\//)
 
       # pass in the dependencies array to the class, to be converted to an object later on
       # available in both class and prototype
-      createdClass.implement({
+      createdClass.$implement({
                                $deps: declaration.$deps,
                                $: {}
                                prototype: {$deps: declaration.$deps, $: {}}
