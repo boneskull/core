@@ -10,5 +10,12 @@
   "curly"    : true,
   "browser"  : true,
   "devel"    : true,
+  "globals"  : {
+    "factory":true,
+    "sx":true,
+    "fs":true,
+    "sinon":true,
+    "expect":true
+  },
   "node"     : true
 }

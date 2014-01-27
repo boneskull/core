@@ -59,7 +59,6 @@
     "i18n-2": ">=0.4.4",
     "slugg": "*",
     "trycatch": "~0.2.0 || ~0.1.0",
-    "toobusy": ">=0.2.3",
     "lazy.js": "*",
     "hashids": "*",
     "fs-extra": "*",
@@ -94,15 +93,19 @@
     "sinon": "*",
     "coffee-script": "*",
     "grunt-mocha-test": "0.7.x",
-    "supertest": "~0.8.2"
+    "supertest": "~0.8.2",
+    "istanbul":"*",
+    "mocha":"*",
+    "mocha-lcov-reporter":"*"
   },
   "optionalDependencies": {
     "nginx-conf": ">=0.1.0",
     "spdy": ">=1.5.0"
   },
   "scripts": {
-    "test": "grunt build"
-  },
+    "test": "grunt build",
+    "coverage": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -t 5000 --require tests/common.js --ui exports tests/*.spec.js",
+    "coveralls": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --report lcovonly -t 5000 --require tests/common.js --ui exports tests/*.spec.js && cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js"  },
   "bin": {
     "sx": "./bin/socketexpress",
     "socketexpress": "./bin/socketexpress"

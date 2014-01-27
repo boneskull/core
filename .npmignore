@@ -5,3 +5,5 @@ ssl
 .idea
 npm-debug.log
 tests/lib-cov/*
+tests/*.spec.js
+coverage
