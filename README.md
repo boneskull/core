@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/pocesar/node-socketexpress.png?branch=develop)](https://travis-ci.org/pocesar/node-socketexpress) [![Coverage Status](https://coveralls.io/repos/pocesar/node-socketexpress/badge.png)](https://coveralls.io/r/pocesar/node-socketexpress)
+[![Build Status](https://travis-ci.org/pocesar/node-socketexpress.png?branch=develop)](https://travis-ci.org/pocesar/node-socketexpress) [![Coverage Status](https://coveralls.io/repos/pocesar/node-socketexpress/badge.png?branch=develop)](https://coveralls.io/r/pocesar/node-socketexpress?branch=develop)
 
 Socket Express (SX for short)
 =============
