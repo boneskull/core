@@ -76,8 +76,8 @@
     "q": "~0.9.7",
     "forms": ">=0.3.0",
     "sprintf-js": ">=0.0.7",
-    "querystring": "~0.2.0",
-    "eventemitter3": "0.0.1",
+    "querystring": "*",
+    "eventemitter3": "*",
 
     "swig": "*",
     "atpl": "*",
