@@ -78,6 +78,7 @@
     "sprintf-js": ">=0.0.7",
     "querystring": "*",
     "eventemitter3": "*",
+    "spdy": ">=1.5.0",
 
     "swig": "*",
     "atpl": "*",
@@ -142,8 +143,7 @@
     "coveralls":"*"
   },
   "optionalDependencies": {
-    "nginx-conf": ">=0.1.0",
-    "spdy": ">=1.5.0"
+    "nginx-conf": ">=0.1.0"
   },
   "scripts": {
     "test": "grunt build",
