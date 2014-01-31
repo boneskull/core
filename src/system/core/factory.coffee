@@ -4,7 +4,7 @@ ES5Class = require('es5class')
 _s = require('underscore.string')
 _ = require('lodash')
 
-module.exports = (repository, callback) ->
+module.exports = (repository, callback, root) ->
   'use strict'
 
   apply = (name, declaration, createdClass) ->
@@ -25,7 +25,7 @@ module.exports = (repository, callback) ->
       createdClass ?= ES5Class.$define(name)
 
     if _.isFunction(declaration)
-      declaration = declaration.call(createdClass, createdClass.$parent)
+      declaration = declaration.call(createdClass, root)
 
     if existing and createdClass.$singleton
       declaration.$singleton = true

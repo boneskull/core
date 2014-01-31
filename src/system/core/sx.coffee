@@ -151,7 +151,7 @@ module.exports = ES5Class.$define('sx', {}, ->
           if subscribers?.length
             subscriber.unsubscribe() for subscriber in subscribers
 
-      factory: Factory(classes, dependencyLoader)
+      factory: Factory(classes, dependencyLoader, @)
       setPaths: setPaths
       _require: require
       loadConfig: (name, where) ->
