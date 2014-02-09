@@ -1,0 +1,60 @@
+module.exports = {
+  $deps:[
+    'models/<%= modelname %>'
+  ],
+  $extend: 'ControllerRest',
+  find: function(req, res) {
+    if (req.param('id')) {
+      this.$.<%= modelname %>.find(req.param('id')).then(
+        function (<%= modelname.toLowerCase() %>) {
+          res;
+        }, function (error) {
+          res;
+        }
+      ).done();
+    } else {
+      this.$.<%= modelname %>.all().then(function(<%= modelname.toLowerCase() %>s) {
+        res;
+      })
+      .done();
+    }
+  },
+  update: function(req, res) {
+    this.$.<%= modelname %>.find(req.param('id')).then(
+      function(<%= modelname.toLowerCase() %>) {
+        return <%= modelname.toLowerCase() %>.updateAttributes(req.params);
+      }, function(err) {
+        res;
+      }
+    )
+    .then(function(<%= modelname.toLowerCase() %>){
+      res;
+    })
+    .done();
+  },
+  insert: function(req, res) {
+    this.$.<%= modelname %>
+    .createNew(req.params)
+    .save()
+    .then(
+      function(<%= modelname.toLowerCase() %>) {
+        res;
+      }, function(err) {
+        res;
+      }
+    )
+    .done();
+  },
+  destroy: function(req, res) {
+    this.$.<%= modelname %>.find(req.param('id')).then(
+      function(<%= modelname.toLowerCase() %>) {
+        <%= modelname.toLowerCase() %>.destroy();
+      }, function(err){
+        res;
+      }
+    )
+    .done(function(){
+      res;
+    });
+  }
+}

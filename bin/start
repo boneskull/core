@@ -1,15 +1,18 @@
-module.exports = function(){
-  var cwd = process.cwd(), index = cwd + '/index.js', fs = require('fs');
+module.exports = function(options){
+  var cwd = process.cwd(), index = cwd + '/app.js', fs = require('fs');
 
   if (fs.existsSync(index) && fs.existsSync(cwd + '/package.json')) {
     var pkg = require(cwd + '/package.json');
     if (typeof pkg.dependencies !== 'undefined' && typeof pkg.dependencies['socket-express'] !== 'undefined') {
-      console.log('[*] Starting SX server');
+      console.log('[*] Starting SX server' + (options.development ? ' in development mode' : ''));
+      if (options.development) {
+        process.env.NODE_ENV = 'development';
+      }
       require(index);
     } else {
-      console.log("[*] Missing 'socket-express' dependency, did this folder was created using 'sx new app'?");
+      console.log("[*] Missing 'socket-express' dependency, was this folder created using 'sx new \"appname\"'?".red);
     }
   } else {
-    console.log("[*] No SX server found, aborting... Did you do a 'sx new' command before?\n    This command should be run on your top level SX app folder");
+    console.log("[*] No SX application found, aborting... Did you do a 'sx new \"appname\"' command before?\n    This command should be run on your top level SX app folder".red);
   }
 };

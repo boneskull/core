@@ -1,4 +1,4 @@
-Factory = require './factory'
+Factory = require('./factory')
 
 app = require('express')()
 
@@ -17,21 +17,6 @@ module.exports = ES5Class.$define('sx', {}, ->
 
     sxChannel = postal.channel 'sx'
 
-    setPaths = (root) =>
-
-      normalize = (_path) ->
-        path.normalize(root + _path)
-
-      @$implement(
-        paths:
-          root   : normalize('/')
-          system : normalize('/system/')
-          app    : normalize('/app/')
-          public : normalize('/public/')
-          modules: normalize('/modules/')
-      )
-
-      return
 
     classes = {}
     configs = {}
@@ -152,7 +137,6 @@ module.exports = ES5Class.$define('sx', {}, ->
             subscriber.unsubscribe() for subscriber in subscribers
 
       factory: Factory(classes, dependencyLoader, @)
-      setPaths: setPaths
       _require: require
       loadConfig: (name, where) ->
 
@@ -227,8 +211,9 @@ module.exports = ES5Class.$define('sx', {}, ->
 
         if _path and fs.existsSync(_path)
           declaration = @_require _path
-          cls = @factory(tmpName or name, declaration)
-          return cls
+          if declaration isnt undefined
+            cls = @factory(tmpName or name, declaration)
+            return cls
 
         false
     }

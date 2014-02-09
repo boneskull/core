@@ -1,47 +1,38 @@
 #!/usr/bin/env node
 
+require('colors');
+
 var
 	program = require('commander'),
-	pkg = require('../package.json'),
-  colors = require('colors'),
-  transformers = require('transformers'),
-  Lazy = require('lazy.js')
-  ;
+	pkg = require('../package.json');
 
 program
 	.version(pkg.version);
 
 program
 	.command('generate <type> <name>')
-	.description('Generate modules, models, controllers, scaffold depending on your project settings')
+	.description([
+    'Generate modules, models, controllers, scaffold depending on your project settings',
+    '',
+    'Scaffold generates a model and a REST controller'
+  ].join('\n'))
 	.action(function(type, name){
 		require('./generate')(program, type, name);
 	}).on('--help', function(){
-		console.log('    $ sx generate model User name:string email:string'.yellow);
+		console.log('    $ sx generate model user name:string email:string'.yellow);
 		console.log('    $ sx generate module mymodule'.yellow);
-		console.log('    $ sx generate controller User'.yellow);
-		console.log('    $ sx generate scaffold User'.yellow);
+		console.log('    $ sx generate controller home'.yellow);
+		console.log('    $ sx generate controller:rest user'.yellow);
+		console.log('    $ sx generate controller:template main'.yellow);
+		console.log('    $ sx generate scaffold user'.yellow);
 	});
 
 function list(val){
   return val.split(',');
 }
 
-
-
 var
   spacing = "\n\t\t\t   * ",
-  templates = Lazy(transformers).map(function (v, k){ return k; }).filter(function(v){
-    return Object.prototype.hasOwnProperty.call(transformers, v) && 
-      [
-        'uglify', 'uglify-js', 'uglifyCSS', 'uglifyJSON', 'uglify-json', 
-        'js', 'css', 'highlight', 'html2jade', 'component-css', 'component',
-        'component-js', 'cdata', 'cson', 'uglifyJS', 'uglify-css', 'stylus',
-        'less', 'sass', 'coffee-script', 'coffeescript', 'coffeeScript', 'md', 
-        'coffeekup'
-      ].indexOf(v) < 0
-    ;
-  }).toArray(),
   frontend = [ 'ember', 'angular', 'backbone', 'knockback', 'marionette'],
   styles = ['stylus', 'sass', 'less'],
   databases = ['Firebird','MongoDB','MySQL','CouchDB','PostgreSQL','Redis','SQLite'],
@@ -58,7 +49,6 @@ program
 	.command('new <name>')
 	.description('Create a new Socket Express app')
 	.option('-c, --coffee', 'Set to output Coffeescript for generators', true)
-	.option('-t, --template <type>', "Set prefered template types, used internally to lookup views, separate by commas, can be one or more of:" + format(templates), list, ['jade'])
 	.option('-f, --frontend <type>', 'Set front-end type, separate by commas, can be one or more of:' + format(frontend), list, ['jquery','angular'])
 	.option('-s, --style <type>', 'Set CSS type, can be one or more, separate by commas' + format(styles), list, ['stylus'])
 	.option('-d, --database <type>', 'Set database type, can be:' + format(databases), 'mongodb')
@@ -82,8 +72,8 @@ program
 	.command('start')
 	.description('Start the app')
 	.option('-d, --development', 'Starts the server in development mode, and will hot swap files so you don\'t need to reload the server while writing your app', false)
-	.action(function(){
-    require('./start')();
+	.action(function(options){
+    require('./start')(program, options);
 	});
 
 

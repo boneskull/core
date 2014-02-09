@@ -1,10 +1,10 @@
 module.exports = {
+  $singleton: true
   $deps: [
     {'Q':'q'}
     {'sprintf': 'sprintf-js'}
     {'_':'lodash'}
   ]
-  $singleton: true
   $setup: ->
     # import all lodash functions
     @$implement(@$._)

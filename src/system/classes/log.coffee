@@ -4,7 +4,7 @@ module.exports = {
   ]
   $static: {
     $setup: (sx) ->
-      @_config = sx.config('log').env(process.env.NODE_ENV || 'development')
+      @_config = sx.config('log').env()
       @$implement(@$.winston, true)
 
       return

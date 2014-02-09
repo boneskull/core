@@ -1,32 +1,40 @@
-[![Build Status](https://travis-ci.org/pocesar/node-socketexpress.png?branch=develop)](https://travis-ci.org/pocesar/node-socketexpress) [![Coverage Status](https://coveralls.io/repos/pocesar/node-socketexpress/badge.png?branch=develop)](https://coveralls.io/r/pocesar/node-socketexpress?branch=develop)
+[![Build Status](https://travis-ci.org/pocesar/node-socketexpress.png?branch=develop)](https://travis-ci.org/pocesar/node-socketexpress) [![Coverage Status](https://coveralls.io/repos/pocesar/node-socketexpress/badge.png?branch=develop)](https://coveralls.io/r/pocesar/node-socketexpress?branch=develop) [![Node dependencies status](https://david-dm.org/pocesar/node-socketexpress/dev-status.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress) [![devDependency Status](https://david-dm.org/pocesar/node-socketexpress/dev-status.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress#info=devDependencies)
 
 Socket Express (SX for short)
 =============
 
 When realtime and stateless HTTP get together, and live happily ever after.
-HMVC (Hierarchical model–view–controller) framework built on top of [Primus](https://github.com/primus/primus) and [Express.js](https://github.com/visionmedia/express) (that might change to [Koa](https://github.com/koajs/koa) in near future when generators arrive to node stable) for [Node.js](http://nodejs.org),
-inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone/port for Node for you), using _almost_ nothing more than already existing packages in NPM but with some consistent, maintainable, _cascading "class-based" Javascript_ glue together.
+HMVC (Hierarchical model–view–controller) framework built on top of [Primus](https://github.com/primus/primus) and
+[Express.js](https://github.com/visionmedia/express) (that might change to [Koa](https://github.com/koajs/koa) in near future when
+generators arrive to node stable) for [Node.js](http://nodejs.org),
+inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone/port for Node for you), using _almost_
+nothing more than already existing packages in NPM but with some consistent, maintainable, _cascading "class-based" Javascript_ glue
+together, relying on dependency injection and the D.R.Y. principle, alongside some autoloading magic.
 
 Highlights
 =============
 
 * No DSL
 * No new jargon to learn
-* Built around the _Repository Pattern_, _Dependency Injection Pattern_ and based on _Pub/Sub_ for
-events (through `postal.js`). No need to reinvent the wheel, just adding the monster truck over them!
+* Based on the idea that there's no need to reinvent the wheel, just add the monster truck over them!
+* Focused on convention over configuration
+* Built around the _Repository Pattern_ and _Dependency Injection Pattern_
 * Plain Javascript (or Coffeescript if you fancy that, the source of sx itself is written in Coffeescript)
-* Nothing is enforced, you (may) only follow folder structure, place the files where they belong, and you are set
-* Convention over configuration
+* Nothing is enforced, you may only follow folder structure, place the files where they belong, and you are set (but you might as well
+not)
 * Everything are _classes_ that you can extend to override behavior or add functionality, but favoring _Object Composition_
 over _Class Inheritance_ in most cases (that means, changing base classes don't change subsequent classes and perform faster)
 using [ES5Class](https://github.com/pocesar/ES5-Class)
-* There's only one sexy global namespace that rhymes: `sx`
+* Many global variables are frowned upon, so there's only one sexy global namespace that rhymes: `sx` that you may or may not use (
+if you are in a hurry, but it's best to use dependency injection)
 * No nested _callback hell_, almost everywhere you can use [Q](https://github.com/kriskowal/q) Promises library
-* Ready for node 0.8, 0.10 and 0.11
-* Intuitive naming for core classes, minimizing the need to keep coming back to the documentation to understand what something does
+* Ready for node 0.10+
+* Intuitive naming for system classes, minimizing the need to keep coming back to the documentation to understand what something does
 * Free from _require hell_, using some **magic** through convention and loading mechanisms through automated dependency injection
-* Focused on tests (testing and testability), it's really easy to test, `modules`, `controllers`, `views`, `models`, they always
-available through your entire app
+* Focused on tests (testing and testability), it's really easy to test, `modules`, `controllers`, `views`, `models`
+* Ready for large scale, well organized applications
+* Most of the system classes are "agnostic" and abstracted and can be used separated from the entire framework
+(as you can see in the tests)
 
 Install
 =============
@@ -55,14 +63,22 @@ $ sx update
 
 It will update the Socket Express system folder and dependencies
 
-App load order
+Classes
+=============
+
+Check the [Wiki](https://github.com/pocesar/node-socketexpress/wiki/_pages) for the explanation of each system
+class that comes with SX
+
+This `README.md` is just an one-page overview of the entire framework.
+
+Coming from Ruby or PHP background?
 =============
 
 Your whole app is loaded when the server is loaded. In Node.js realm, there's no such thing as
 per request compilation + execution (if you are coming from a Rails or PHP framework background).
 
 So, every config, every controller, route, view, are loaded on the startup, and the calls are
-directed to their places and are always available.
+directed to their places and are always available through your instance.
 
 Just to make clear that it's not the same as PHP that the code is compiled everytime you visit
 a page and load only the _important_ parts to save memory.
@@ -73,7 +89,7 @@ each folder class can overwrite / overload existing classes and/or extend/get ri
 Conventions
 =============
 
-## Cascading file system (CFS), Factory and Repositories
+## Cascading File System (CFS), Factory pattern and classes Repositories
 
 Most of the time you'll want to create your own classes, or extend the core classes using the `sx.factory` method,
 this is what makes your classes and code be available in your entire app, without needing to use `require` or
@@ -84,11 +100,14 @@ the uninstantiated class. The `sx.*classname*` is the shortcut class taken from 
 sx.classes.View // this is a base class, that you can extend your own classes
 sx.View // this doesn't exists
 sx.classes.Url // this exists and it's a $singleton
-sx.Url // since it's a singleton, it's automatically instantiated
+sx.Url // since it's a $singleton, it's automatically "instantiated"
 ```
 
-You may not want to instantiate a class (like the case of `View` class), for that, because it's a building block and
-must be extended to have a functionality. For example:
+Every time you define a file under the `classes` folder, it becomes a class, that means, the `sx.factory` call is
+done automatically, normalized and put into the `sx.classes` repository for you.
+
+You may not want a `$singleton` class, like the `Url` class, but instead, for the `View` class, because it's a building
+block and must be extended to have a functionality. For example:
 
 ```js
 // we are in app/classes/test.js
@@ -100,11 +119,14 @@ module.exports = {
     main: function(){
     },
     construct: function(){
+        this.$super();
     }
 }
+// you can call it sx.classes.Test.$create().main() for example
 ```
 
-Singletons are always instantiated, because they serve as static helpers and must be available everywhere in your code. To create a singleton, you can use:
+Singletons are always instantiated, because they serve as static helpers and must be available everywhere in your code. To create a
+singleton, you can use:
 
 ```js
 // we are in app/classes/myhelper.js
@@ -137,10 +159,10 @@ module.exports = {
     },
     prototypeFunction: function(){ }
 }
-
+// later on
 console.log(sx.classes.MyClass.staticFunction); // function
 console.log(sx.classes.MyClass.prototypeFunction); // undefined
-console.log(sx.classes.MyClass.create().prototypeFunction); // function
+console.log(sx.classes.MyClass.$create().prototypeFunction); // function
 ```
 
 ##### You can extend any core classes, rewrite how it works, or simply add more functionality.
@@ -156,7 +178,7 @@ sx.Url.$implement({
 this will extend the core class `Url` and add the `cool` method, because the `Url` class is a
 singleton. The nature of a singleton cannot be changed, a singleton will always be a singleton.
 
-You may also want to rewrite some of the functionality maybe? Using `implement`, you can extend a helper
+You may also want to rewrite some of the functionality maybe? Using `$implement`, you can extend an existing class
 
 ```js
 sx.Url.$implement({
@@ -169,7 +191,8 @@ sx.Url.$implement({
 or you want to create a new class from the base of another. Notice the call to the
 `this.$super`, that calls the original `title` function ultra cool your-own `Url` class,
 but still use the provided core `Url` class, use `$implement`.
-`$implement` adds other classes to your class, but doesn't add any inheritance to them.
+`$implement` adds other classes to your class, but doesn't add any inheritance to them, it's
+called _Object Composition_.
 
 ```js
 // we are in app/classes/cool_url.js
@@ -178,9 +201,9 @@ module.exports = {
     /*
     these all work the same way
 
-    $implement: ['Url'],
+    $implement: ['Url','Session'],
     $implement: sx.Url,
-    $implement: [sx.Url],
+    $implement: [sx.Url,sx.classes.Session],
     */
     tooGood: function(){
 
@@ -207,7 +230,7 @@ Instead, you really want to use [validator](https://github.com/chriso/node-valid
 // create the file in app/classes/form.js
 module.exports = {
     $deps: [
-        {'validator': 'validator'} // require validator
+        {'validator': 'validator'} // var validator = require('validator')
     ]
     $setup: function(){
         // we want to configure validator as per docs
@@ -230,7 +253,7 @@ module.exports = {
 
         var
             validator = new this.$.validator.Validator(), errors = [],
-            d = this.$.Q.defer();
+            d = this.$.Q.defer(); // original dependencies are injected to this subclass
 
         for(var field in rules){
             // rules is an object comprised of {nameOfField: {ruleType: [args]}}
@@ -242,7 +265,7 @@ module.exports = {
         }
 
         if (errors = validator.getErrors()) {
-            d.reject(errors, validator);
+            d.reject({errors: errors, validator: validator});
         } else {
             d.resolve(validator);
         }
@@ -252,7 +275,7 @@ module.exports = {
 }
 ```
 
-##### To create your own helpers and classes, use `sx.factory`
+##### To create your own helpers and classes
 
 ```js
 // create static helpers using $singleton: true
@@ -270,8 +293,8 @@ module.exports = {
 sx.SpecificHelper.doThis(...);
 ```
 
-It's a good practice to keep each class in their own file, so it's maintainable and easy to goto. But
-nothing stops you to create as many `factory`s in the same file:
+It's a good practice to keep each class in their own file, so it's maintainable and easy to go to. But
+nothing stops you to create as many `sx.factory`s in the same file:
 
 ```js
 // app/classes/all.js
@@ -289,27 +312,36 @@ sx.factory('Class3', {
 sx.factory('Class4', {
     $implement: 'Class3'
 });
+// everything will be available in sx.classes, that is:
+// sx.classes.Class1
+// sx.classes.Class2
+// sx.classes.Class3
+// sx.classes.Class4
 ```
 
-Extending existing classes, you don't need to do anything, but to name your file with the name of the existing class:
+Extending existing classes, you don't need to do anything, but to name your file with the same name of the existing class:
 
 ```js
 // we are in app/classes/route.js
-module.exports = function(parent){
+module.exports = function(sx){
     // "this" is the current class definition
-    // you can use this.include() to add functions and properties to the prototype
+    // you can use this.$include() to add functions and properties to the prototype
 
     // Using a function instead of an object is good since you can keep private data,
-    // and share between other classes
+    // and share between instances (called flyweight pattern)
 
     // Always return your definition
     // You can use all the "modifiers" here:
-    // $static, $singleton (if it's always a singleton, you can't change it), $dependencies, etc
+    // $static, $singleton (if it's always a singleton, you can't change it), $deps, etc
     return {
+        $deps: ['Session'],
         superMatch: function(){}
     };
-}
+};
+// this modification will add the superMatch function to sx.classes.Route automatically, plus add `Session` to it's
+// dependencies along side with already included dependencies
 ```
+
 #### Dependency injection
 
 ##### Now, your class might depend on some other class or require, that must be loaded in order for it to work. Dependency injection to the rescue:
@@ -317,15 +349,16 @@ module.exports = function(parent){
 ```js
 // we are in app/classes/some_class.js
 module.exports = {
-    $deps: [
+    $deps: [       // $deps = dependencies
         'Url',     //
         'Route',   // load these classes from the classes repository inside sx.classes
         'Locale',  //
-        {'_s': 'underscore.string'}, //
-        {'accounting': 'accounting'}, // require('accounting') and name it accounting in this.$.accounting
-        {'XRegExp': ['xregexp', 'XRegExp'] // requires 'xregexp' module and use the 'XRegExp' variable, like require('xregexp').XRegExp
+        {'_s': 'underscore.string'},       // require('underscore.string')
+        {'accounting': 'accounting'},      // require('accounting') and name it accounting in this.$.accounting
+        {'XRegExp': ['xregexp', 'XRegExp'] // requires('xregexp') module and use the 'XRegExp' variable, like doing require('xregexp').XRegExp
     ],
     construct: function(){
+        // the this.$ is the dependency injected modules (or classes) namespace
         this.$.Url
         this.$.Route
         this.$.Locale
@@ -341,27 +374,34 @@ module.exports = {
         $setup: function(){
             // this is a special function that is called ONCE when this file is require'd
             // and transformed into a javascript "class"
-            this.$implement(this.$.accounting, true); // Inherit the prototype of accounting
+
+            // Inherit the prototype of accounting plus call it's constructor when the class "SomeClass"
+            // is instantiated
+            this.$implement(this.$.accounting, true);
         }
     }
 }
 ```
 
 * Passing a string will try to inject other classes from SX. Eg: `'Url','Bootstrap'`
-* Passing an object will inject a regular node.js module.
+* Passing an object will inject a regular node.js module (from `node_modules` folder).
 
 ```js
-    {'_': 'lodash'}
-    // act as
-    _ = require('lodash')
+    $deps: [
+        {'_': 'lodash'}
+    ]
+    // work as
+    var _ = require('lodash')
 ```
 
 * Passing an object with an array will inject a regular node.js module but using a variable from the require.
 
 ```js
-    {'XRegExp': ['xregexp', 'XRegExp']}
-    // act as
-    XRegExp = require('xregexp').XRegExp
+    $deps: [
+        {'XRegExp': ['xregexp', 'XRegExp']}
+    ]
+    // work as
+    var XRegExp = require('xregexp').XRegExp
 ```
 
 This makes your module or code loosely coupled and more testable, but you can always
@@ -370,33 +410,36 @@ since the `sx` global got everything you need.
 
 #### File names
 
-Naming your files is very important, so you don't lose track of the generated classes.
-It's recommended that you use lowercase filenames without spaces or dashes. If you'd want
+Naming your files is very important, so you don't lose track of the generated classes and class
+names.
+
+It's recommended that you use lowercase filenames without spaces or dashes (-). If you'd want
 your class to look like `MyAwesomeClass`, you'd name your file `my_awesome_class.js`, as
-underscores are converted to CamelCase.
+underscores are converted to CamelCase. All classes start with an UPPERCASE letter.
 
 ## Controllers
 
-Your controllers go into `app/classes/controller/`, with a lowercase filename, and a class extending:
+Your controllers go into `app/classes/controllers/`, with a lowercase filename, and a class extending:
 
 * `Controller`: A controller that does nothing at first, only respond to routes, you decide what it should return
 * `ControllerTemplate`: A controller that automatically render content inside the 'content' var in the template
 * `ControllerRest`: A regular controller that responds to REST commands (DELETE, PUT, POST, GET, that maps to destroy, insert, update and get)
 * `ControllerRealtime`: A realtime controller that uses Primus to push updates to the browser using Websockets
-* `ControllerAjax`: A controller that can respond to AJAX requests automatically, inherits from ControllerTemplate and serves ajax through `ajaxAction`
+* `ControllerAjax`: A controller that can respond to AJAX requests automatically, inherits from `ControllerTemplate` and serves ajax through `ajaxAction`
 
 as a string (core class), CamelCased.
 
 ```js
-// we are in app/classes/controller/index.js
+// we are in app/classes/controllers/index.js
 // will be available in sx.controllers.Index
 module.exports = {
-    $extend: 'Controller', // need to explicitly tell which controller to extend, any changes to the Controller class reflects in this new controller as well
+    $extend: 'Controller', // need to explicitly tell which controller to extend, any changes to the Controller class reflects in this
+                           // new controller as well
     'actionIndex': function(){
     }
 }
 
-// we are in modules/mymodule/controller/index.js
+// we are in modules/mymodule/controllers/index.js
 // will be available in sx.modules.Mymodule.controllers.Index
 module.exports = {
     $extend: 'ControllerTemplate',
@@ -412,7 +455,7 @@ module.exports = {
     }
 }
 
-// we are in app/classes/controller/contact.js
+// we are in app/classes/controllers/contact.js
 // will be available in sx.controllers.Contact
 module.exports = {
     $extend: 'Master', // We are extending from a class that extends from ControllerTemplate
@@ -421,7 +464,7 @@ module.exports = {
     }
 }
 
-// we are in app/classes/controller/load.js
+// we are in app/classes/controllers/load.js
 // You can include mixins and base classes as well, changes to original classes
 // won't reflect in the mixin'd class
 module.exports = {
@@ -433,8 +476,8 @@ module.exports = {
 All controllers from the app are available in `sx.controllers`. Controllers inside folders have their own namespace:
 
 ```js
-console.log(sx.controllers.Index) // in app/classes/controller/index.js
-console.log(sx.controllers.Admin.Index) // in app/classes/controller/admin/index.js
+console.log(sx.controllers.Index) // in app/classes/controllers/index.js
+console.log(sx.controllers.Admin.Index) // in app/classes/controllers/admin/index.js
 console.log(sx.controller('Admin.Index')); // getter that makes it easier to return a controller using an string
 console.log(sx.controller(['Admin','Index'])); // getter that makes it easier to return a controller using an array
 ```
@@ -518,6 +561,8 @@ module.exports = {
 }
 ```
 
+A module can also have it's own `package.json` file and it's own `node_modules` folder without any interference to the rest of the app.
+
 ## Config
 
 Configs are loaded the same way the classes are loaded, they are merged from bottom up. The order is `system`, `modules` then `app` folders.
@@ -542,7 +587,7 @@ Every config loaded is placed in `sx.configs` repository. The key is determined 
 module.exports = {
   myconfig: true
 }
-// you can read it as sx.configs.MyConfig.get('myconfig') or sx.configs.MyConfig.data.myconfig (if you are concerned about performence on using a getter)
+// you can read it as sx.configs.MyConfig.get('myconfig') or sx.configs.MyConfig.data.myconfig (if you are concerned about performance on using a getter)
 ```
 
 Another thing is that you can use nested rules and still be able to access them using the `get` function:
@@ -576,14 +621,14 @@ The config turns into a `Config` class that has a couple of functions to manipul
 
 ##### Config.clone()
 
-clone your data
+deep clone your data, leave the original untouched
 
 ##### Config.set(key, value)
 
 set values on your config. can pass in `'key', 'value'`, or an object with `{'key':'value'}`.
 Existing values will be overwritten.
 
-##### Config.wipe()
+##### Config.wipe(\[newdata\])
 
 either wipe your data, or exchange it if you pass in another object
 
@@ -591,7 +636,7 @@ either wipe your data, or exchange it if you pass in another object
 
 deletes a key on your config
 
-##### Config.get(name, inexistant)
+##### Config.get(name, \[inexistant\])
 
 returns the value of the `name` if it exists, or the `inexistant` value. Eg.: `Config.get('dontexist', 'boo')` returns `'boo'`
 
@@ -602,6 +647,8 @@ checks if a key is set (it can be null, false or zero, but not undefined)
 ##### Config.env(name)
 
 you may have a setting for each environment, and the Config makes it easy to set which environment it should use.
+This is a destructive function that alters your config instance depending on the name you pass in.
+
 You define your config file like this:
 
 ```js
@@ -622,15 +669,19 @@ module.exports = {
 }
 ```
 
-If you call it `Config.env()` (without a name), it will try to use the `process.env.NODE_ENV`, and the other definitions will be deleted (including the `*` and will be merged in one config).
+If you call it `Config.env()` (without a name), it will try to use the `process.env.NODE_ENV`, and the other definitions will be
+deleted (including the `*` and will be merged in one config).
 
 ## Views
 
-Conversely, in SX, all your views are preloaded on bootstrap (for performance reasons) and they are all available in `sx.views` repository.
+Conversely, in SX, all your views are preloaded on bootstrap (for performance reasons) and they are all available in `sx.views`
+repository.
 
-It's much faster to use something that is already instantiated than instantiating on every request, which makes no sense in the node.js realm. Also, by saving it in memory, it won't be hitting the disk for such a trivial task, plus it can be forced-reloaded on-the-fly.
+It's much faster to use something that is already instantiated than instantiating on every request, which makes no sense in the node.js realm.
+Also, by saving it in memory, it won't be hitting the disk for such a trivial task, plus it can be forced-reloaded on-the-fly.
 
-Although, depending on the number of views and templates, it can be a bit overwhelming to find the best balance on your folder structure, but the hierarchy of your folders will reflect in your views repository.
+Although, depending on the number of views and templates, it can be a bit overwhelming to find the best balance on your folder structure,
+but the hierarchy of your folders will reflect in your views repository.
 
 ##### Template languages
 
@@ -667,20 +718,43 @@ You can write the templates from any of these template engines, and use them int
 * coffee
 * verbatim
 
-SX will try to guess (if you don't pass the $type of your view) what engine it uses by file extension.
+SX will try to guess (if you don't pass the `$type` of your view) what engine it uses by file extension.
 
-This is possible because of the underlaying [Transformers.js](https://github.com/ForbesLindesay/transformers) module.
+This is possible because of the underlaying [Consolidate.js](https://github.com/visionmedia/consolidate.js) module.
 
 ##### Automatic render of view
 
-You can render a view associated with the current request by using `res.view` (or using `sx.view('viewpath')` to load other views inside the controller):
+You can render a view associated with the current request by using `res.view` (or using `sx.view('viewpath')` to load
+other views inside the controller):
 
 ```js
-// app/classes/controllers/
+// app/classes/controllers/about.js
+// url like http://localhost:3000/about/index
 module.exports = {
     $extends: 'Controller',
     actionIndex: function(req, res){
-        res.view({name: 'name', other: 'variable'}); // if there's no associated view, it will throw a 404 error
+        res.view({name: 'name', other: 'variable'});
+        // if there's no associated view, it will throw a 404 error
+        // will try to lookup app/views/about/home.*, but since the view is already loaded
+        // when the app started, it will try, through a hash table, find your .about.home view (regardless of the extension)
+    }
+};
+```
+
+Most of the time you'll want to reuse many views in many controllers of your app. By using `sx.view('name.of.view')`, you can access it.
+
+You can also access all your views through `sx.classes.View.views` or add it as a dependency on your controller:
+
+```js
+module.exports = {
+    $deps: [
+        'View'
+    ],
+    $extend: 'Controller',
+    actionIndex: function(req, res){
+        this.$.View.get('name.of.view').render({
+            your:'variable'
+        }).done(res.render);
     }
 };
 ```
@@ -720,20 +794,21 @@ module.exports = {
             controller: 'user',
             action: 'index'
         }
-        // routes that are highly , are not advised to cache, since they can take up a lot of space
+        // routes that are highly mutable like URIs that match user names, pages, etc, are not advised to cache,
+        // since they can take up a lot of memory
     }
     adminPanel: {
         uri: 'admin(/<controller>(/<action>(/<id>)))',
         defaults: {
             directory: 'admin', // make it look inside the app/classes/controllers/admin/ instead
             controller: 'dash', // the controller is in app/classes/controllers/admin/dash.js
-            action: 'index'
+            action: 'index' // actionIndex
         }
     },
     default: {
         // everything inside parenthesis are optional.
         uri: '(<controller>(/<action>(/<id>)))', // this will match /, /user, /user/create, /user/update/1 for example
-        defaults: { // if the optional parts of the URL aren't define, it will use the defaults below
+        defaults: { // if the optional parts of the URL aren't defined, it will use the defaults below
             controller: 'Home', // app/classes/controllers/home.js
             action: 'index' // and actionIndex method
         },
@@ -741,6 +816,7 @@ module.exports = {
             // filters are optional, and can inject data inside the request.
             // the returned value of the function will be used instead of the original req.params
             // if you return false, the route will be rejected. this function like an express middleware (sort of)
+
             var params = req.params;
             if (req.method === 'POST') {
                 params['hello'] = true;
@@ -758,6 +834,17 @@ sx.Route.url('default', {controller: 'index', action: 'use', id: 1}); // will ge
 sx.Route.url('adminPanel', {controller: 'index', action: 'use', id: 1}); // will generate /admin/index/use/1
 ```
 
+or with Dependency Injection:
+
+```js
+module.exports = {
+    $deps: ['Route'],
+    actionIndex: function(){
+        this.$.Route.url('default', {controller: 'index', action: 'use', id: 1});
+    }
+};
+```
+
 ## Models
 
 Models in SX are merely a wrapper for the [jugglingdb](https://github.com/1602/jugglingdb) module, with some "promises" sauce.
@@ -769,7 +856,7 @@ First your define your model:
 // we are in app/classes/models/user.js, accessible in sx.models.User
 module.exports = {
     $deps: [ // can use deps like any other class
-        'model/Rights'
+        'models/Rights'
     ],
     $static: {
         // can also define static functions like any other class
@@ -838,7 +925,7 @@ module.exports = {
         active: Boolean,
         role: Number
     },
-    $functions: {
+    $functions: { // functions are included in the **jugglingdb model prototype**
         isActive: function(){
             if (this.role !== 1) {
                 return this.active;
@@ -862,16 +949,17 @@ module.exports = {
 Then you use it in your controller (or other models):
 
 ```js
-// we are in app/classes/controller/user.js
+// we are in app/classes/controllers/user.js
 // those are reached through HTTP verbs
 module.exports = {
     $deps: [
-        'model/User'
+        'models/User'
     ],
     $extend: 'ControllerRest',
     find: function(req, res){ // GET, in this case, GET localhost/user(/1?)
         // or sx.models.User or sx.model('User')
         if (req.param('id')) {
+
             this.$.User.find(req.param('id')).then(function(user){
                 if (user.isActive()) {
                     res.json(user);
@@ -881,14 +969,18 @@ module.exports = {
             }, function(error){
                 res.json({error: error});
             });
+
         } else {
+
             this.$.User.all({where: {active: true}}).then(function(users){
                 res.json(users);
             });
+
         }
     },
     update: function(req, res){ // POST, in this case, POST localhost/user/1
         // or sx.models.User or sx.model('User')
+
         this.$.User.find(req.param('id')).then(function(user){
             return user.updateAttributes(req.params);
         }, function(err){
@@ -897,8 +989,10 @@ module.exports = {
         .then(function(user){
             res.json(user);
         });
+
     },
     insert: function(req, res){ // PUT, in this case, PUT localhost/user
+
         var user = this.$.User.createNew(req.params);
 
         user.save().then(function(){
@@ -906,6 +1000,7 @@ module.exports = {
         }, function(){
             res.json(false);
         });
+
     },
     destroy: function(req, res){
 
@@ -915,6 +1010,17 @@ module.exports = {
 
 Notice that you may have multiple databases in your app, and use them all at once interchangeably. You may use Redis, Mongodb, Mysql, Postgre,
 everything jugglingdb supports.
+
+## Public data
+
+`public` folders are available inside `system`, `modules` and `app` folder, so how can you serve them all at once?
+
+If you are using Express to deliver your (please see FAQ below) public assets (css, images, javascript, etc),
+then all your folders are "hooked up" when your app starts and served automatically.
+
+Notice that the `app` folder will have a preference over `modules` and `system`, that means, if you have two files
+with the same name (eg: `logo.png`) inside a module in `modules/mymodule/public/logo.png` and in `app/public/logo.png`
+it will serve only the `app` one.
 
 ## Testing
 
@@ -945,7 +1051,8 @@ describe('mystuff', function(){
 });
 ```
 
-You cannot test it properly, what if "stuff" is a network module? What if it's a binding or you can't do much with it, like if it uses lenghty timeouts, endless loops or asynchronous code?
+You cannot test it properly, what if "stuff" is a network module? What if it's a binding or you can't do much with it, like if it uses
+lenghty timeouts, endless loops or asynchronous code?
 You can't mock, stub, spy on "stuff". That's the importance of dependency injection:
 
 ```js
@@ -964,19 +1071,23 @@ Now you have access to "stuff" and can mock any of these functions and it's prot
 ```js
 describe('mystuff', function(){
     it('should return a promise', function(){
-        var stub  = sinon.stub(sx.classes.Mystuff.$.stuff, 'timeout', function(){ return; });
+        var MyStuff = sx.classes.Mystuff;
 
-        var myNewStuff = new sx.classes.Mystuff();
+        var stub  = sinon.stub(Mystuff.$.stuff, 'timeout', function(){ return; });
+
+        var myNewStuff = new Mystuff();
 
         /* test it */
+        expect(stub.calledWith(1,2)).to.be(true);
 
-        sx.classes.Mystuff.$.restore();
+        Mystuff.$.stuff.timeout.restore();
     });
 });
 ```
 
 All you have to do is remember to restore any modifications you do to the functions, since they are part of your whole application.
-SX comes with a file named 'common.js' and you can add your globals for your tests in there, and you must load it before your spec files, so you have access to the sx global.
+SX comes with a file named 'common.js' and you can add your globals for your tests in there, and you must load it before your
+spec files, so you have access to the sx global.
 
 ```js
 // for example, the ./Gruntfile.js config with grunt-mocha-test
@@ -998,12 +1109,13 @@ module.exports = function (grunt){
 };
 ```
 
-When testing controllers, you can load a controller on-the-fly by calling `sx.controller('yourcontroller')` and you may instantiate it at will
+When testing controllers, you can load a controller on-the-fly by calling `sx.controller('yourcontroller')` and you may instantiate
+it at will
 
 ```js
 define('Home control', function(){
     it('should return a valid json', function(){
-        var HomeCtrl = new sx.controller('home');
+        var HomeCtrl = sx.controller('home');
         var User = sx.model('user');
 
         var req = {params: {id: '1'}};
@@ -1036,14 +1148,64 @@ define('Home control', function(){
 });
 ```
 
+## Localization
+
+The localization is done through the [l20n](https://github.com/l20n/l20n.js) module, it's a wrapper that extends the View to
+support localizing strings in your templates.
+
+As usual, you might want to use other localization engine, such as [i18n](https://github.com/mashpie/i18n-node)
+
+Your localization files goes inside the `locales` folder, usually you'd want to put it in `app/locales`, but you may as well create
+a module for each of your languages, and put them in `modules/en_module/locales/en.locale`. All `.locale` files are automatically
+loaded (if any). l20n enables you to keep your translation files D.R.Y. (don't repeat yourself), so you can have one file
+with all the variances on each language.
+
+Example how a `default.locale` (or any other filename you'd want) would look like (that holds all your translation strings):
+
+```php
+<helloWorld[$lang]{
+    *en: """
+        Hello World
+    """,
+    de:"""
+        Hallo Welt
+    """,
+    pt:"""
+        Olá mundo
+    """
+}>
+```
+
+But you may want to put them in different files (this is the way preferred by l20n docs):
+
+```php
+// app/locales/en.locale
+<helloWorld "Hello world">
+```
+
+```php
+// app/locales/de.locale
+<helloWorld "Hallo Welt">
+```
+
+```php
+// app/locales/pt.locale
+<helloWorld "Olá mundo">
+```
+
+The only drawback in this method is having to always keep all translation files up-to-date and
+repeating code (when you shouldn't).
 
 ## FAQ (semi-srsly)
 
 ##### What kind of black magic does SX offer me?
 
-It loads all your "classes" when your app starts, applies the config to each class that needs a config, and glue your routes to your controllers automagically.
+It loads all your "classes" when your app starts, applies the config to each class that needs a config, and glue your routes to your
+controllers automagically.
 
-The assets, usually images, css, client-side javascript are entirely up to you (and your task runner \[like Grunt\]), it's advised to use NGINX with Phusion Passenger, to deal with your assets though, express isn't up par to its performance
+The assets, usually images, css, client-side javascript are entirely up to you (and your task runner \[like Grunt\]), it's advised
+to use NGINX with Phusion Passenger, to deal with your public assets though, express shouldn't deal with content delivery and it isn't
+up par to NGINX performance in that sense.
 
 You can get away with an working app in a couple of minutes with minimal configuration.
 
@@ -1082,9 +1244,20 @@ module.exports = {
 But nothing stops you to go full sloppycode mode and do:
 
 ```js
+// app/classes/my_middleware.js
 sx.app.use(function(req, res, next){
     // I can't be tested, ever /o\
 });
+```
+
+Or even (a little better):
+
+```js
+// modules/mymodulemiddleware/classes/stuff.js
+module.exports = function(sx){
+    sx.app.use(require('nodejs-middleware-module'));
+    sx.app.use(require('nodejs-middleware-module2'));
+};
 ```
 
 ##### But, but... writing code like that is a pain in the ass, I want an app full of globals, I never test my code and I hate conventions

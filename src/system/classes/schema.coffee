@@ -4,7 +4,7 @@ module.exports = {
   ]
   $static: {
     $setup: (sx) ->
-      @config = sx.config('database').env(process.env.NODE_ENV || 'development')
+      @config = sx.config('database').env()
 
       @Schema = @$.jugglingdb.Schema
 

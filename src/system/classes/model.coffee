@@ -6,20 +6,14 @@ module.exports = {
     {'Q':'q'}
   ]
   $static: {
-    $setup: (sx) ->
-      modelName = @$className
-      if modelName isnt 'Model'
-        sx.models[modelName] = new @
-
-      return
-
+    models: {}
     factory: (type, name, definition) ->
-      new @(type, name, definition)
+      @models[name] = new @(type, name, definition)
   }
   getSchema: (type = 'memory') ->
     @$.Schema.get(type)
 
-  _applyRelation: (type) ->
+  _applyRelation: (type, name) ->
     if @$relations[type]?
       isArray = false
 
@@ -29,10 +23,14 @@ module.exports = {
              else
                @$relations[type]
 
+      if modelName.$class?
+        modelName = modelName.$class.$className
+
       if @db.models[modelName]?
-        @model[type].apply(@model, if isArray then  @$relations[type] else [@$relations[type]])
+        args = [@db.models[modelName]].concat((if isArray then @$relations[type] else [@$relations[type]]).slice(1))
+        @model[type].apply(@model, args)
       else
-        throw new Error(@$.Utils.sprintf('Model "%s" doesnt exists in "%s" of model "%s"', modelName, type, @model.name))
+        throw new Error(@$.Utils.sprintf('Model "%s" doesnt exists in "%s" of model "%s"', modelName, type, name))
 
     return
 
@@ -62,9 +60,9 @@ module.exports = {
       @model::[k] = v for k,v of @$functions
 
     if @$relations?
-      @_applyRelation('belongsTo')
-      @_applyRelation('hasMany')
-      @_applyRelation('hasAndBelongsToMany')
+      @_applyRelation('belongsTo', name)
+      @_applyRelation('hasMany', name)
+      @_applyRelation('hasAndBelongsToMany', name)
 
     if d?
       d.promise.done((cb) =>
@@ -89,13 +87,13 @@ module.exports = {
 
     for k,v of @model.properties when k isnt 'model'
       Object.defineProperty(model, k, {
-        get: ((k)->
+        get: ((v)->
           ->
-            @model[k]
+            @model[v]
         )(k)
-        set: ((k) ->
+        set: ((v) ->
           (value) ->
-            @model[k] = value
+            @model[v] = value
             return
         )(k)
         enumerable: true

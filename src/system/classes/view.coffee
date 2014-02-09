@@ -1,20 +1,12 @@
 module.exports = {
   $deps: [
     'Utils'
-    {'Q':'q'}
     {'p': 'path'}
     {'fs': 'fs'}
-    {'_s':'underscore.string'}
-    {'t': 'transformers'}
+    {'c': 'consolidate'}
   ]
   $static: {
-    $setup: (sx) ->
-      viewName = @$className
-      if viewName isnt 'View'
-        sx.views[viewName] = new @
-
-      return
-
+    views: {}
     factory: (name, data, type) ->
       if name?.$className? and name.$className is 'Request'
         true
@@ -24,11 +16,11 @@ module.exports = {
 
     extension = opts.type or path.substr((~-path.lastIndexOf(".") >>> 0) + 2)
 
-    if not @$.t[extension]?
+    if not @$.c[extension]?
       throw new Error(@$.Utils.sprintf('Invalid view extension "%s"', extension))
 
-    @engine = @$.t[extension]
-    @engine.render = @$.Q.nbind(@engine.render, @$.t[extension])
+    @engine = @$.c[extension]
+    @engine.render = @$.Utils.$.Q.nbind(@engine.render, @$.c[extension])
 
     @load((str) =>
       @content = str
@@ -60,6 +52,8 @@ module.exports = {
       cb(content.toString())
     )
 
+    return
+
   render: (data = {}) ->
-    @engine.render(@content, data)
+    @engine.render(@content, @$.Utils.merge({filename: @path, cache: 'memory'}, data))
 }

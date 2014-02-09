@@ -1,0 +1,62 @@
+module.exports = {
+  $deps:[
+    'models/<%= modelname %>'
+  ]
+  $extend: 'ControllerRest'
+  find: (req, res) ->
+    if req.param('id')
+      @$.<%= modelname %>.find(req.param('id')).then(
+        (model) ->
+          res
+        (error) ->
+          res
+      ).done()
+    else
+      @$.<%= modelname %>.all().then((models)->
+        res
+      )
+      .done()
+
+    return
+
+  update: (req, res) ->
+    @$.<%= modelname %>.find(req.param('id')).then(
+      (model)->
+        model.updateAttributes(req.params)
+      (err)->
+        res
+    )
+    .then((model)->
+      res
+    )
+    .done()
+
+    return
+
+  insert: (req, res) ->
+    @$.<%= modelname %>
+    .createNew(req.params)
+    .save()
+    .then(
+      (model) ->
+        res
+      (err) ->
+        res
+    )
+    .done()
+
+    return
+
+  destroy: (req, res) ->
+    @$.<%= modelname %>.find(req.param('id')).then(
+      (model) ->
+        model.destroy()
+      (err) ->
+        res
+    )
+    .done(->
+      res
+    )
+
+    return
+}

@@ -6,3 +6,4 @@ tests/lib-cov/*
 /dump.js
 tests/*.spec.js
 coverage
+.sx

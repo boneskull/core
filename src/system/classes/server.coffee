@@ -9,6 +9,11 @@ module.exports = {
     {'tls':'tls'}
     {'jsonrpc2':'json-rpc2'}
   ]
+  $static: {
+    servers: {}
+    factory: (name, type, options) ->
+      @servers[name] = new @(type, options)
+  }
   $extend: 'EventEmitter',
   construct: (@type = 'http', @options = {}) ->
     @$super()
@@ -35,6 +40,22 @@ module.exports = {
         }
 
         @server = @$.https.createServer(@options)
+      when 'tls'
+        @options = {
+
+        }
+
+        @server = @$.tls.createServer(@options)
+      when 'jsonrpc'
+        @options = {
+
+        }
+
+        @server = @$.jsonrpc2.Server.create(@options)
+      when 'express'
+        @options = options
+
+        @server = @$.express()
       when 'http'
         @options = {}
 

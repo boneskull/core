@@ -4,12 +4,9 @@ module.exports = {
     {'_s':'underscore.string'}
   ]
   $static: {
-    $setup: (sx) ->
-      controllerName = @$className
-      if controllerName isnt 'Controller'
-        sx.controllers[controllerName] = new @
+    controllers: {}
+    factory: () ->
 
-      return
   }
   error: (path) ->
     throw new Error(@$.Utils.sprintf('The requested URL %s was not found on this server.', path))

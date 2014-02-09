@@ -22,8 +22,17 @@ module.exports = (grunt) ->
 
     watch:
       coffee:
-        files: ['./src/**/*.coffee', './tests/**/*.spec.coffee']
+        files: ['./src/**/*.coffee', './test/**/*.spec.coffee']
         tasks: ['build']
+
+    mocha_istanbul:
+      coveralls:
+        src: 'test'
+        options:
+          coverage: true
+          quiet: true
+      coverage:
+        src: 'test'
 
     coffee:
       src:
@@ -38,17 +47,17 @@ module.exports = (grunt) ->
         options:
           bare: true
         expand : true
-        cwd    : 'tests'
+        cwd    : 'test'
         src    : ['*.coffee']
-        dest   : 'tests'
+        dest   : 'test'
         ext    : '.spec.js'
 
 
     mochaTest:
       test:
-        src    : ['./tests/**/*.spec.coffee']
+        src    : ['./test/**/*.spec.coffee']
         options:
-          require    : ['coffee-script','./tests/common.js']
+          require    : ['coffee-script','./test/common.js']
           checkLeaks : true
           colors     : true
           ui         : 'exports',
@@ -59,7 +68,22 @@ module.exports = (grunt) ->
   grunt.loadNpmTasks 'grunt-contrib-coffee'
   grunt.loadNpmTasks 'grunt-mocha-test'
   grunt.loadNpmTasks 'grunt-contrib-clean'
+  grunt.loadNpmTasks 'grunt-mocha-istanbul'
 
+  grunt.event.on 'coverage', (lcov, done) ->
+    require('coveralls').handleInput(lcov, (err) ->
+      if (err)
+        grunt.log.error(err)
+        done(false)
+      else
+        done()
+
+      return
+    )
+    return
+
+  grunt.registerTask 'coveralls', ['coffee','mocha_istanbul:coveralls']
+  grunt.registerTask 'coverage', ['coffee','mocha_istanbul:coverage']
   grunt.registerTask 'build', ['coffee','mochaTest:test']
   grunt.registerTask 'releaseit', release
 

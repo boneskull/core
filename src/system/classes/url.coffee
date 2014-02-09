@@ -1,15 +1,14 @@
 module.exports = {
   $singleton: true
   $deps: [
-    'Bootstrap'
     {'URI': 'URIjs'}
     {'slugg': 'slugg'}
     {'_': 'lodash'}
     {'_s': 'underscore.string'}
   ]
 
-  $setup: ->
-    @config = @$.Bootstrap.config
+  $setup: (sx) ->
+    @config = sx.config('bootstrap').env()
 
   title: (name, separator = '-') ->
     name = @$.slugg(name)

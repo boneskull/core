@@ -82,6 +82,9 @@ module.exports = (repository, callback, root) ->
     createdClass
 
   (name, declaration = {}) ->
+    if not typeof declaration in ['object', 'function']
+      throw new Error(_s.sprintf('Class declaration for "%s" must be an object or function', name))
+
     name = classify(name)
 
     create = () ->

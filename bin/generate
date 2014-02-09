@@ -1,3 +1,45 @@
 module.exports = function(program, type, name){
-  console.log(arguments);
+  var
+    root = __dirname,
+    app = process.cwd(),
+    Q = require('q'),
+    fs = require('fs-extra'),
+    path = require('path'),
+    n = path.normalize,
+    factory = require('../lib/system/core/factory'),
+    sx = fs.readJsonFileSync(n(app + '/.sx')),
+    args = program.rawArgs.slice(5),
+    consolidate = require('consolidate');
+
+  switch (type.toLowerCase()) {
+    case 'scaffold':
+      Q.nfapply(
+        consolidate.ejs,
+        [
+          root + '/templates/controller/rest.' + (sx.coffee ? 'coffee' : 'js') + '.ejs',
+          {modelname: factory.classify(name)}
+        ]
+      )
+      .then(function(js){
+        console.log(js);
+        return Q.nfapply(
+          consolidate.ejs,
+          [
+
+          ]
+        );
+      })
+      .then(function(js){
+
+      })
+      .done();
+
+      break;
+    case 'model':
+      break;
+    case 'module':
+      break;
+    case 'controller':
+      break;
+  }
 };

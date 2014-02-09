@@ -25,7 +25,7 @@
   ],
   "preferGlobal": true,
   "engines": {
-    "node": "~0.8.0 || ~0.10.0 || ~0.11.0"
+    "node": ">=0.10.0"
   },
   "license": "MIT",
   "repository": {
@@ -37,28 +37,24 @@
   },
   "dependencies": {
     "cors": "*",
-    "express": ">=3.1.0",
-    "jugglingdb": ">=0.2.0",
-    "transformers": ">=2.0.0",
-    "async": ">=0.2.6",
+    "express": "3.x.x",
+    "jugglingdb": "0.2.x",
+    "consolidate": ">=0.10.0",
     "formidable": ">=1.0.13",
     "moment": ">=2.0.0",
     "moment-timezone": "*",
     "validator": ">=0.4.28",
-    "express-validator": ">=0.3.2",
     "accounting": ">=0.3.2",
     "postal": "*",
-    "gm": ">=1.8.2",
     "passport": ">=0.1.16",
     "nodemailer": ">=0.4.1",
-    "winston": ">=0.6.2",
-    "uglify-js": ">=2.2.5",
-    "URIjs": ">=1.10.0",
+    "winston": "*",
+    "URIjs": "1.x.x",
     "es5class": "*",
-    "commander": ">=1.1.1",
-    "i18n-2": ">=0.4.4",
+    "commander": "1.x.x",
+    "l20n": "~1.0.0",
     "slugg": "*",
-    "trycatch": "~0.2.0 || ~0.1.0",
+    "trycatch": "1.0.x",
     "lazy.js": "*",
     "hashids": "*",
     "fs-extra": "*",
@@ -70,17 +66,18 @@
     "connect-mongo": "*",
     "primus": ">=1.5.1",
     "glob": "*",
-    "xregexp": ">=2.0.0",
+    "xregexp": "2.x.x",
     "getobject": ">=0.1.0",
     "request": ">=2.30.0",
-    "q": ">=0.9.7",
+    "q": "*",
     "forms": ">=0.3.0",
     "sprintf-js": ">=0.0.7",
     "querystring": "*",
     "eventemitter3": "*",
-    "spdy": ">=1.5.0",
-    "restify":"*",
-    "json-rpc2":"*",
+    "spdy": "*",
+    "restify": "*",
+    "json-rpc2": "*",
+    "cache-manager": "0.3.x",
 
     "swig": "*",
     "atpl": "*",
@@ -114,15 +111,11 @@
     "markdown-js": "*",
     "markdown": "*",
     "coffee-script": "*",
-    "cson": "*",
     "coffeekup": "*",
     "coffeecup": "*",
     "templayed": "*",
     "plates": "*",
-    "dot": "*",
-    "component-builder": "*",
-    "html2jade": "*",
-    "highlight.js": "*"
+    "dot": "*"
   },
   "peerDependencies": {
     "bower": "*"
@@ -130,27 +123,26 @@
   "devDependencies": {
     "expect.js": "*",
     "grunt": "0.4.x",
-    "grunt-cli": "*",
     "grunt-contrib-watch": "*",
     "grunt-contrib-coffee": "*",
     "grunt-release": ">=0.3.2",
     "grunt-contrib-clean": "*",
     "sinon": "*",
     "coffee-script": "*",
-    "grunt-mocha-test": "0.7.x",
-    "supertest": "~0.8.2",
-    "istanbul":"*",
-    "mocha":"*",
-    "mocha-lcov-reporter":"*",
-    "coveralls":"*"
+    "grunt-mocha-test": "*",
+    "supertest": "*",
+    "istanbul": "*",
+    "mocha": "*",
+    "mocha-lcov-reporter": "*",
+    "coveralls": "*",
+    "grunt-mocha-istanbul": "*"
   },
   "optionalDependencies": {
     "nginx-conf": ">=0.1.0"
   },
   "scripts": {
-    "test": "grunt build",
-    "coverage": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- -t 5000 --require tests/common.js --ui exports tests/*.spec.js",
-    "coveralls": "node ./node_modules/istanbul/lib/cli.js cover ./node_modules/mocha/bin/_mocha -- --report lcovonly -t 5000 --require tests/common.js --ui exports tests/*.spec.js && cat ./coverage/lcov.info | node ./node_modules/coveralls/bin/coveralls.js"  },
+    "test": "grunt build"
+  },
   "bin": {
     "sx": "./bin/socketexpress",
     "socketexpress": "./bin/socketexpress"
