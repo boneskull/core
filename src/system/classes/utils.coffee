@@ -4,6 +4,7 @@ module.exports = {
     {'Q':'q'}
     {'sprintf': 'sprintf-js'}
     {'_':'lodash'}
+    {'g':'getobject'}
   ]
   $setup: ->
     # import all lodash functions
@@ -68,5 +69,51 @@ module.exports = {
 
     return
 
+  wrapConditionalPromise: (context, funcName, isReturn = false, baseContext = null) ->
+    return if typeof context[funcName] isnt 'function'
+
+    original = context[funcName]
+
+    defined = original.length # number of arguments, last one is usually the callback
+    Q = @$.Q
+
+    if isReturn is true
+      context[funcName] = ->
+        d = Q.defer()
+
+        try
+          d.resolve(original.apply(context, arguments))
+        catch e
+          d.reject(e)
+
+        d.promise
+
+      return
+
+    # eg: if theres 3 args, and the callback is passed, don't return a promise, but execute the callback
+    context[funcName] = ->
+      args = Array.prototype.slice.call(arguments)
+
+      if args.length is defined
+        # callback is included, act like the original call
+        original.apply(baseContext || context, args)
+      else
+        # return the promise this time
+        d = Q.defer()
+        args.push(d.makeNodeResolver())
+
+        try
+          original.apply(baseContext || context, args)
+        catch e
+          d.reject(e)
+
+        d.promise
+
   noop: ->
+
+  assignObject: (out, path, value) ->
+    if @isArray(path)
+      path = path.join('.')
+
+    @$.g.set(out, path, value)
 }

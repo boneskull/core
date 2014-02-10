@@ -15,11 +15,8 @@ module.exports = {
           createdAt: {type: Number, default: Date.now}
         })
 
-      @User.model::info = ->
-        "#{@name}/#{@gender}/#{@married}"
-
-      @User.model.create({name: 'Shaltay', gender: 'female', married: false, age: 21})
-      @User.model.create({name: 'Humpfey', gender: 'male', married: true, age: 25})
+      @User.create({name: 'Shaltay', gender: 'female', married: false, age: 21})
+      @User.create({name: 'Humpfey', gender: 'male', married: true, age: 25})
 
     'schema': ->
       expect(jdb.Schema).to.be(@User.$.Schema.Schema)
@@ -28,10 +25,9 @@ module.exports = {
     'instance': (done) ->
       expect(@User).to.be.ok()
       expect(@User.db).to.be.ok()
-      expect(@User.model).to.be.ok()
-      expect(@User.model.findOne).to.be.ok()
+      expect(@User.findOne).to.be.ok()
 
-      @User.model.find(1, (err, user) ->
+      @User.find(1, (err, user) ->
         user.updateAttributes({married: true})
         done()
       )
@@ -39,8 +35,8 @@ module.exports = {
     'promises versions are working like the original ones': (done) ->
       User = @User
 
-      User.model.findOne({id: 1}, (err, data) ->
-        User.findOne({id: 1}).then((_data)->
+      User.findOne(id: 1, (err, data) ->
+        User.findOne(id: 1).then((_data)->
           expect(_data).to.eql(data)
           _data
         ).then((found)->
@@ -108,36 +104,41 @@ module.exports = {
           }
       })
 
-      User = new User;
+      User = new User
       User.validatesPresenceOf('name')
 
-      user = User.createNew(name: 'Hello', married: true, id: 5)
+      User
+      .create({name: 'Hello', married: true, id: 5})
+      .done((user)->
+        user
+          .updateAttributes(extra: 'Super text')
+          .then(->
+            user.updateAttribute('age', 41)
+          )
+          .then(->
+            expect(user.age).to.equal(41)
+            user.married = false
+            user.dob = Date.now()
+          )
+          .then(->
+            expect(user.married).to.be(false)
+            expect(user.dob).to.not.be.an('undefined')
 
-      user.save()
+            User.create(married: false, id: 1)
+          )
+          .then((u)->
+            u.save()
+          )
+          .fail(
+            (u) ->
+              console.log(u)
+              expect(u.name).to.be('ValidationError')
+          )
+          .done(->
+            done()
+          )
+      )
 
-      user
-        .updateAttributes(extra: 'Super text')
-        .then(->
-          user.updateAttribute('age', 41)
-        )
-        .then(->
-          expect(user.age).to.equal(41)
-          user.married = false
-          user.dob = Date.now()
-        )
-        .then(->
-          expect(user.model.married).to.be(false)
-          expect(user.model.dob).to.not.be.an('undefined')
-
-          User.createNew(married: false, id: 1).save()
-        )
-        .fail(
-          (u) ->
-            expect(u.name).to.be('ValidationError')
-        )
-        .done(->
-          done()
-        )
 
     'can use custom functions': (done) ->
       _User = Model.$define('User', {
@@ -159,9 +160,9 @@ module.exports = {
       })
 
       User = new _User
-      user = User.createNew(name: 'asd', active: true)
-
-      expect(user.model.testFunction()).to.equal(true)
+      User.create(name: 'asd', active: true).done((user)->
+        expect(user.testFunction()).to.equal(true)
+      )
 
     'works with simplified definition': (done) ->
       _Config = Model.$define('Config', {
@@ -172,7 +173,8 @@ module.exports = {
 
       Config = new _Config
 
-      Config.createNew(alive: true).save().done((model)->
+      Config.create({alive: true}).done((model)->
+        model.save()
         expect(model.alive).to.be(true)
       )
 
@@ -193,19 +195,20 @@ module.exports = {
             hasMany: ['Config', {as: 'configs', foreignKey: 'configId'}]
           }
           findByName: (name) ->
-            @model.findOne({where: {name: name}}, -> console.log arguments)
+            @findOne({where: {name: name}})
       })
 
       User = new _User
 
-      user = User.createNew({name: 'hoho', active: true, configId: 1})
-
-      user.save().then((model)->
-        User.findByName('hoho', ->console.log arguments)
-      ).then((model)->
-        expect(model.isActive()).to.be(false)
-        #model.configs(->console.log arguments)
-      ).done()
+      User.create({name: 'hoho', active: true, configId: 1, role: 2}).done((user)->
+        user.save().then(->
+          User.findByName('hoho')
+        ).then((model)->
+          expect(model.isActive()).to.be(true)
+        ).done(->
+          done()
+        )
+      )
 
     'applies defered actions to the model': (done) ->
       _User = Model.$define('User', {
@@ -225,12 +228,10 @@ module.exports = {
       })
 
       User = new _User
-      user = User.createNew(name: 'Name', id: 1)
-      User.createNew(name: 'Name', id: 2)
-
-      process.nextTick(->
-        expect(user.model.getStatus()).to.equal('Name / Inactive')
+      User.create({name: 'Name', id: 1}).done((user)->
+        expect(user.getStatus()).to.equal('Name / Inactive')
         done()
       )
+      User.create({name: 'Name', id: 2})
 
 }

@@ -4,11 +4,16 @@ module.exports = {
     'Utils'
     'Log'
     {'Q':'q'}
+    {'g':'getobject'}
   ]
   $static: {
     models: {}
+
     factory: (type, name, definition) ->
-      @models[name] = new @(type, name, definition)
+      model = new @(type, name, definition)
+      @$.Utils.assignObject(@models, name.split(/\//g), model)
+
+      model
   }
   getSchema: (type = 'memory') ->
     @$.Schema.get(type)
@@ -75,31 +80,29 @@ module.exports = {
       if d.promise.inspect() isnt 'fulfilled'
         d = null
 
-    @$.Utils.promesifyAll(@model, @)
+    # monkey patch jugglingdb to use promises
+    nproto = [
+      'update','create','upsert','updateOrCreate',
+      'findOrCreate','exists','find','all','findOne',
+      'destroyAll','count'
+    ]
+
+    @$.Utils.wrapConditionalPromise(@model, i) for i in nproto
+
+    proto = [
+      'save','destroy','updateAttribute',
+      'updateAttributes','reload'
+    ]
+
+    @$.Utils.wrapConditionalPromise(@model::, i) for i in proto
+
+    for own name,func of @model
+      if (typeof func is 'function')
+        @[name] = ((func, model) ->
+          ->
+            func.apply(model, arguments)
+        )(func, @model)
 
     return
 
-  createNew: (data) ->
-
-    model = {
-      model: new @model(data, @db)
-    }
-
-    for k,v of @model.properties when k isnt 'model'
-      Object.defineProperty(model, k, {
-        get: ((v)->
-          ->
-            @model[v]
-        )(k)
-        set: ((v) ->
-          (value) ->
-            @model[v] = value
-            return
-        )(k)
-        enumerable: true
-      })
-
-    @$.Utils.promesifyAll(model.model, model)
-
-    model
 }

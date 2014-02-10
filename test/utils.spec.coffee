@@ -14,6 +14,61 @@ module.exports = {
       expect(str).to.be.ok()
       expect(str('a', 'b', 'aabbcc')).to.equal('bbbbcc')
 
+    'wrapConditionalPromise': (done) ->
+      obj = {
+        testing: (callback) ->
+          callback(null, 'ok')
+        testing2: (value, callback) ->
+          callback(null, value)
+        testing3: (value, value2, callback) ->
+          callback(null, {value:value, value2:value2})
+        testing4: (callback) ->
+          callback('fail')
+        testing5: ->
+          true
+      }
+      Utils.wrapConditionalPromise(obj, 'testing')
+      Utils.wrapConditionalPromise(obj, 'testing2')
+      Utils.wrapConditionalPromise(obj, 'testing3')
+      Utils.wrapConditionalPromise(obj, 'testing4')
+      Utils.wrapConditionalPromise(obj, 'testing5', true)
+
+      obj.testing(->
+        expect(arguments).to.eql({0: null, 1: 'ok'})
+
+        obj.testing().then((res)->
+          expect(res).to.be('ok')
+        ).done(->
+          obj.testing2('value', (err, result)->
+            expect(err).to.be(null)
+            expect(result).to.be('value')
+            obj.testing2('value').then((value)->
+              expect(value).to.be('value')
+            ).done(->
+              obj.testing3('1','2', (err,result)->
+                expect(err).to.be(null)
+                expect(result).to.eql({value:'1',value2:'2'})
+                obj.testing3('1','2').then((res)->
+                  expect(res).to.eql({value:'1',value2:'2'})
+                ).done(->
+                  obj.testing4((err, result)->
+                    expect(err).to.be('fail')
+                    obj.testing4().fail((err)->
+                      expect(err).to.be('fail')
+                    ).done(->
+                      obj.testing5().done((value)->
+                        expect(value).to.be(true)
+                        done()
+                      )
+                    )
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+
     'promesifyAll': () ->
       source = {
         one: (val, cb) ->

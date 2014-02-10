@@ -24,16 +24,13 @@ module.exports = {
           }
         };
       });
-      this.User.model.prototype.info = function() {
-        return "" + this.name + "/" + this.gender + "/" + this.married;
-      };
-      this.User.model.create({
+      this.User.create({
         name: 'Shaltay',
         gender: 'female',
         married: false,
         age: 21
       });
-      return this.User.model.create({
+      return this.User.create({
         name: 'Humpfey',
         gender: 'male',
         married: true,
@@ -47,9 +44,8 @@ module.exports = {
     'instance': function(done) {
       expect(this.User).to.be.ok();
       expect(this.User.db).to.be.ok();
-      expect(this.User.model).to.be.ok();
-      expect(this.User.model.findOne).to.be.ok();
-      return this.User.model.find(1, function(err, user) {
+      expect(this.User.findOne).to.be.ok();
+      return this.User.find(1, function(err, user) {
         user.updateAttributes({
           married: true
         });
@@ -59,7 +55,7 @@ module.exports = {
     'promises versions are working like the original ones': function(done) {
       var User;
       User = this.User;
-      return User.model.findOne({
+      return User.findOne({
         id: 1
       }, function(err, data) {
         return User.findOne({
@@ -117,7 +113,7 @@ module.exports = {
       }).to.throwException();
     },
     'can define the attrs when defined on itself and have promises and getters/setters': function(done) {
-      var User, user;
+      var User;
       User = Model.$define('User', {
         $attrs: function() {
           return {
@@ -142,35 +138,38 @@ module.exports = {
       });
       User = new User;
       User.validatesPresenceOf('name');
-      user = User.createNew({
+      return User.create({
         name: 'Hello',
         married: true,
         id: 5
-      });
-      user.save();
-      return user.updateAttributes({
-        extra: 'Super text'
-      }).then(function() {
-        return user.updateAttribute('age', 41);
-      }).then(function() {
-        expect(user.age).to.equal(41);
-        user.married = false;
-        return user.dob = Date.now();
-      }).then(function() {
-        expect(user.model.married).to.be(false);
-        expect(user.model.dob).to.not.be.an('undefined');
-        return User.createNew({
-          married: false,
-          id: 1
-        }).save();
-      }).fail(function(u) {
-        return expect(u.name).to.be('ValidationError');
-      }).done(function() {
-        return done();
+      }).done(function(user) {
+        return user.updateAttributes({
+          extra: 'Super text'
+        }).then(function() {
+          return user.updateAttribute('age', 41);
+        }).then(function() {
+          expect(user.age).to.equal(41);
+          user.married = false;
+          return user.dob = Date.now();
+        }).then(function() {
+          expect(user.married).to.be(false);
+          expect(user.dob).to.not.be.an('undefined');
+          return User.create({
+            married: false,
+            id: 1
+          });
+        }).then(function(u) {
+          return u.save();
+        }).fail(function(u) {
+          console.log(u);
+          return expect(u.name).to.be('ValidationError');
+        }).done(function() {
+          return done();
+        });
       });
     },
     'can use custom functions': function(done) {
-      var User, user, _User;
+      var User, _User;
       _User = Model.$define('User', {
         $attrs: function(deferred) {
           deferred(function(model) {
@@ -189,23 +188,25 @@ module.exports = {
         }
       });
       User = new _User;
-      user = User.createNew({
+      return User.create({
         name: 'asd',
         active: true
+      }).done(function(user) {
+        return expect(user.testFunction()).to.equal(true);
       });
-      return expect(user.model.testFunction()).to.equal(true);
     },
     'works with simplified definition': function(done) {
-      var Config, User, user, _Config, _User;
+      var Config, User, _Config, _User;
       _Config = Model.$define('Config', {
         $attrs: {
           alive: Boolean
         }
       });
       Config = new _Config;
-      Config.createNew({
+      Config.create({
         alive: true
-      }).save().done(function(model) {
+      }).done(function(model) {
+        model.save();
         return expect(model.alive).to.be(true);
       });
       _User = Model.$define('User', {
@@ -231,31 +232,31 @@ module.exports = {
           ]
         },
         findByName: function(name) {
-          return this.model.findOne({
+          return this.findOne({
             where: {
               name: name
             }
-          }, function() {
-            return console.log(arguments);
           });
         }
       });
       User = new _User;
-      user = User.createNew({
+      return User.create({
         name: 'hoho',
         active: true,
-        configId: 1
-      });
-      return user.save().then(function(model) {
-        return User.findByName('hoho', function() {
-          return console.log(arguments);
+        configId: 1,
+        role: 2
+      }).done(function(user) {
+        return user.save().then(function() {
+          return User.findByName('hoho');
+        }).then(function(model) {
+          return expect(model.isActive()).to.be(true);
+        }).done(function() {
+          return done();
         });
-      }).then(function(model) {
-        return expect(model.isActive()).to.be(false);
-      }).done();
+      });
     },
     'applies defered actions to the model': function(done) {
-      var User, user, _User;
+      var User, _User;
       _User = Model.$define('User', {
         $attrs: function(deferred) {
           deferred(function(model) {
@@ -274,17 +275,16 @@ module.exports = {
         }
       });
       User = new _User;
-      user = User.createNew({
+      User.create({
         name: 'Name',
         id: 1
+      }).done(function(user) {
+        expect(user.getStatus()).to.equal('Name / Inactive');
+        return done();
       });
-      User.createNew({
+      return User.create({
         name: 'Name',
         id: 2
-      });
-      return process.nextTick(function() {
-        expect(user.model.getStatus()).to.equal('Name / Inactive');
-        return done();
       });
     }
   }

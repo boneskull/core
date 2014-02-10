@@ -3,6 +3,7 @@ module.exports = {
     {'jugglingdb': 'jugglingdb'}
   ]
   $static: {
+    schemas: {}
     $setup: (sx) ->
       @config = sx.config('database').env()
 
@@ -16,7 +17,5 @@ module.exports = {
       throw new Error('No setting for that schema') if not @config.get(name) and name isnt 'memory'
 
       @schemas[name] = new @Schema(name, @config.get(name))
-
-    schemas: {}
   }
 }

@@ -35,6 +35,7 @@ if you are in a hurry, but it's best to use dependency injection)
 * Ready for large scale, well organized applications
 * Most of the system classes are "agnostic" and abstracted and can be used separated from the entire framework
 (as you can see in the tests)
+* Super Performance! The framework won't be your bottleneck, the database and external requests could (but shouldn't)
 
 Install
 =============
