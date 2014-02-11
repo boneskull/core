@@ -3,36 +3,72 @@ module.exports = function(program, type, name){
     root = __dirname,
     app = process.cwd(),
     Q = require('q'),
-    fs = require('fs-extra'),
+    fse = require('fs-extra'),
+    fs = require('fs'),
     path = require('path'),
     n = path.normalize,
     factory = require('../lib/system/core/factory'),
-    sx = fs.readJsonFileSync(n(app + '/.sx')),
-    args = program.rawArgs.slice(5),
+    sx = fse.readJsonFileSync(n(app + '/.sx')),
+    args = program.rawArgs.slice(5).map(function(i){
+      var j = i.split(':');
+      return j.length === 2 ?
+        {name: j[0], data: factory.classify(j[1])} :
+        {data: i};
+    }),
+    ext = (sx.coffee ? '.coffee' : '.js'),
     consolidate = require('consolidate');
 
-  switch (type.toLowerCase()) {
-    case 'scaffold':
-      Q.nfapply(
+  type = type.split(':');
+
+  function controller(name, type, actions){
+    return Q.nfapply(
         consolidate.ejs,
         [
-          root + '/templates/controller/rest.' + (sx.coffee ? 'coffee' : 'js') + '.ejs',
-          {modelname: factory.classify(name)}
+          root + '/templates/controller/' + type + ext + '.ejs',
+          { modelname: factory.classify(name),
+            actions: actions }
         ]
       )
-      .then(function(js){
-        console.log(js);
-        return Q.nfapply(
-          consolidate.ejs,
-          [
+      .then(function(controller){
+        var path = n(app + '/app/classes/controllers/' + name.toLowerCase() + ext);
+        fse.createFileSync(path);
+        fs.writeFileSync(path, controller);
+      });
+  }
 
-          ]
-        );
-      })
-      .then(function(js){
+  function model(name){
+    return Q.nfapply(
+      consolidate.ejs,
+      [
+        root + '/templates/model/model' + ext + '.ejs',
+        {
+          fields: args.map(function(i){
+            if (i.name) {
+              return i.name + ': ' + i.data;
+            }
+            return i.data + ': String';
+          }),
+          db: sx.database
+        }
+      ]
+    ).then(function(model){
+      var path = n(app + '/app/classes/models/' + name.toLowerCase() + ext);
+      fse.createFileSync(path);
+      fs.writeFileSync(path, model);
+    });
+  }
 
-      })
-      .done();
+  function fail(err){
+      console.log(('[!] ' + (err instanceof Error ? err.toString() : err)).red);
+  }
+
+  switch (type[0].toLowerCase()) {
+    case 'scaffold':
+      controller(name, 'rest')
+      .then(model(name)).fail(fail)
+      .done(function(){
+        console.log(('[*] Done, created REST controller and model for ' + name).green);
+      });
 
       break;
     case 'model':
@@ -40,6 +76,24 @@ module.exports = function(program, type, name){
     case 'module':
       break;
     case 'controller':
+      if (typeof type[1] === 'undefined') {
+        // plain controller
+        controller(name,'plain')
+        .done(function(){
+
+        });
+      } else {
+        switch (type[1].toLowerCase()) {
+          case 'template':
+            break;
+          case 'ajax':
+            break;
+          default:
+            fail('Controller type doesnt exist: "' + type[1] + '"');
+        }
+      }
       break;
+    default:
+      fail('Unknown generate type "' + type[0] + '"');
   }
 };

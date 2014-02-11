@@ -1,3 +1,5 @@
 module.exports = {
-
-}
+    $attrs:
+        <% for(var i = 0; i < fields.length; i++){ %><%= fields[i] %>
+        <% } %>
+};

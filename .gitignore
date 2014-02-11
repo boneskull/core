@@ -3,7 +3,7 @@ node_modules
 npm-debug.log
 dapp
 tests/lib-cov/*
-/dump.js
-tests/*.spec.js
+dump.js
+test/*.spec.js
 coverage
 .sx
