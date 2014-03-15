@@ -1,7 +1,7 @@
 [![Build Status](https://travis-ci.org/pocesar/node-socketexpress.png?branch=develop)](https://travis-ci.org/pocesar/node-socketexpress)
 [![Coverage Status](https://coveralls.io/repos/pocesar/node-socketexpress/badge.png?branch=develop)](https://coveralls.io/r/pocesar/node-socketexpress?branch=develop)
 
-[![Node dependencies status](https://david-dm.org/pocesar/node-socketexpress/dev-status.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress)
+[![Dependency Status](https://david-dm.org/pocesar/node-socketexpress.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress)
 [![devDependency Status](https://david-dm.org/pocesar/node-socketexpress/dev-status.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress#info=devDependencies)
 
 Socket Express (SX for short)
@@ -700,40 +700,59 @@ but the hierarchy of your folders will reflect in your views repository.
 
 You can write the templates from any of these template engines, and use them interchangeably:
 
-* swig
-* atpl
-* dot
-* liquor
-* ejs
-* eco
-* jqtpl
-* haml
-* haml-coffee
-* whiskers
-* hogan
-* handlebars
-* underscore
-* walrus
-* mustache
-* templayed
-* plates
-* mote
-* toffee
-* coffeecup
-* just
-* ect
-* jade
-* dust
-* jazz
-* qejs
-* styl
-* markdown
-* coffee
-* verbatim
+##### Template engines
+
+  - [atpl](http://documentup.com/soywiz/atpl.js) - Compatible with twig templates
+  - [coffeecup](http://documentup.com/gradus/coffeecup) - pure coffee-script templates (fork of coffeekup)
+  - [dot](http://documentup.com/olado/doT) [(website)](https://github.com/Katahdin/dot-packer) - focused on speed
+  - [dust](http://documentup.com/akdubya/dustjs) [(website)](http://akdubya.github.com/dustjs/) - asyncronous templates
+  - [eco](http://documentup.com/sstephenson/eco) - Embedded CoffeeScript templates
+  - [ect](http://documentup.com/baryshev/ect) [(website)](http://ectjs.com/) - Embedded CoffeeScript templates
+  - [ejs](http://documentup.com/visionmedia/ejs) - Embedded JavaScript templates
+  - [haml](http://documentup.com/visionmedia/haml.js) [(website)](http://haml-lang.com/) - dry indented markup
+  - [haml-coffee](http://documentup.com/netzpirat/haml-coffee/) [(website)](http://haml-lang.com/) - haml with embedded CoffeeScript
+  - [handlebars](http://documentup.com/wycats/handlebars.js/) [(website)](http://handlebarsjs.com/) - extension of mustache templates
+  - [hogan](http://documentup.com/twitter/hogan.js) [(website)](http://twitter.github.com/hogan.js/) - Mustache templates
+  - [jade](http://documentup.com/visionmedia/jade) [(website)](http://jade-lang.com/) - robust, elegant, feature rich template engine
+  - [jazz](http://documentup.com/shinetech/jazz)
+  - [jqtpl](http://documentup.com/kof/jqtpl) [(website)](http://api.jquery.com/category/plugins/templates/) - extensible logic-less templates
+  - [JUST](http://documentup.com/baryshev/just) - EJS style template with some special syntax for layouts/partials etc.
+  - [liquor](http://documentup.com/chjj/liquor) - extended EJS with significant white space
+  - [mustache](http://documentup.com/janl/mustache.js) - logic less templates
+  - [QEJS](http://documentup.com/jepso/QEJS) - Promises + EJS for async templating
+  - [swig](http://documentup.com/paularmstrong/swig) [(website)](http://paularmstrong.github.com/swig/) - Django-like templating engine
+  - [templayed](http://documentup.com/archan937/templayed.js/) [(website)](http://archan937.github.com/templayed.js/) - Mustache focused on performance
+  - [toffee](http://documentup.com/malgorithms/toffee) - templating language based on coffeescript
+  - [underscore](http://documentup.com/documentcloud/underscore) [(website)](http://documentcloud.github.com/underscore/)
+  - [walrus](http://documentup.com/jeremyruppel/walrus) - A bolder kind of mustache
+  - [whiskers](http://documentup.com/gsf/whiskers.js/tree/) - logic-less focused on readability
+
+##### Stylesheet Languages
+
+  - [less](http://documentup.com/cloudhead/less.js) [(website)](http://lesscss.org/) - LESS extends CSS with dynamic behavior such as variables, mixins, operations and functions.
+  - [stylus](http://documentup.com/learnboost/stylus) [(website)](http://learnboost.github.com/stylus/) - revolutionary CSS generator making braces optional
+  - [sass](http://documentup.com/visionmedia/sass.js) [(website)](http://sass-lang.com/) - Sassy CSS
+
+##### Minifiers
+
+  - [uglify-js](http://documentup.com/mishoo/UglifyJS2) - No need to install anything, just minifies/beautifies JavaScript
+  - [uglify-css](https://github.com/visionmedia/css) - No need to install anything, just minifies/beautifies CSS
+  - ugilify-json - No need to install anything, just minifies/beautifies JSON
+
+##### Other
+
+  - cdata - No need to install anything, just wraps input as `<![CDATA[${INPUT_STRING]]>` with the standard escape for `]]>` (`]]]]><![CDATA[>`).
+  - cdata-js - as `cdata`, but with surrounding comments suitable for inclusion into a HTML/JavaScript `<script>` block: `//<![CDATA[\n${INPUT_STRING\n//]]>`.
+  - cdata-css - as `cdata`, but with surrounding comments suitable for inclusion into a HTML/CSS `<style>` block: `/*<![CDATA[*/\n${INPUT_STRING\n/*]]>*/`.
+  - verbatim - No need to install anything, acts as a verbatim passthrough `${INPUT_STRING}`
+  - escape-html - No need to install anything, just replaces special characters to sanitize input for html/xml
+  - [coffee-script](http://coffeescript.org/) - `npm install coffee-script`
+  - [cson](https://github.com/bevry/cson) - coffee-script based JSON format
+  - markdown - You can use `marked`, `supermarked`, `markdown-js` or `markdown`
 
 SX will try to guess (if you don't pass the `$type` of your view) what engine it uses by file extension.
 
-This is possible because of the underlaying [Consolidate.js](https://github.com/visionmedia/consolidate.js) module.
+This is possible because of the underlaying [Transformers](https://github.com/ForbesLindesay/transformers) module.
 
 ##### Automatic render of view
 
@@ -748,15 +767,16 @@ module.exports = {
     actionIndex: function(req, res){
         res.view({name: 'name', other: 'variable'});
         // if there's no associated view, it will throw a 404 error
-        // will try to lookup app/views/about/home.*, but since the view is already loaded
-        // when the app started, it will try, through a hash table, find your .about.home view (regardless of the extension)
+        // will try to lookup app/views/about/index.*, but since the view is already loaded
+        // when the app started, it will try, through a hash table, find your .about.index view (regardless of the extension)
     }
 };
 ```
 
-Most of the time you'll want to reuse many views in many controllers of your app. By using `sx.view('name.of.view')`, you can access it.
+Most of the time you'll want to reuse many views in many controllers of your app.
+By using `sx.view('name/of/view.ext')`, you can access it.
 
-You can also access all your views through `sx.classes.View.views` or add it as a dependency on your controller:
+You can also access all your views through `sx.classes.View.views` (messy repository) or add it as a dependency on your controller:
 
 ```js
 module.exports = {
@@ -765,7 +785,7 @@ module.exports = {
     ],
     $extend: 'Controller',
     actionIndex: function(req, res){
-        this.$.View.get('name.of.view').render({
+        this.$.View.factory('name/of/view.ejs').render({
             your:'variable'
         }).done(res.render);
     }
@@ -858,15 +878,22 @@ module.exports = {
 };
 ```
 
+or inside your views:
+
+```ejs
+<a href="<%= sx.Route.url('default', {controller: 'index', action: 'use', id: 1}) %>">Home</a>
+```
+
 ## Models
 
-Models in SX are merely a wrapper for the [jugglingdb](https://github.com/1602/jugglingdb) module, with some "promises" sauce.
+Models in SX are merely a wrapper for the [promised-jugglindb](https://github.com/pocesar/promised-jugglindb) module,
+that is [jugglingdb](https://github.com/1602/jugglingdb) with some "promises" sauce.
 Every callback that you would do in jugglingdb becomes a promise:
 
 First your define your model:
 
 ```js
-// we are in app/classes/models/user.js, accessible in sx.models.User
+// we are in app/classes/models/user.js, accessible in sx.models.User or sx.model('User')
 module.exports = {
     $deps: [ // can use deps like any other class
         'models/Rights'
@@ -929,7 +956,7 @@ module.exports = {
 ```
 
 ```js
-// the model can be over simplified:
+// the model can be simplified:
 module.exports = {
     $extend: 'Model',
     $db: 'redis', // if you don't specify this, it will be "memory"
@@ -1031,7 +1058,7 @@ everything jugglingdb supports.
 If you are using Express to deliver your (please see FAQ below) public assets (css, images, javascript, etc),
 then all your folders are "hooked up" when your app starts and served automatically.
 
-Notice that the `app` folder will have a preference over `modules` and `system`, that means, if you have two files
+Notice that the `app` folder will have a precedence over `modules` and `system`, that means, if you have two files
 with the same name (eg: `logo.png`) inside a module in `modules/mymodule/public/logo.png` and in `app/public/logo.png`
 it will serve only the `app` one.
 
