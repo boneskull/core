@@ -1,8 +1,11 @@
 [![Build Status](https://travis-ci.org/pocesar/node-socketexpress.png?branch=develop)](https://travis-ci.org/pocesar/node-socketexpress)
 [![Coverage Status](https://coveralls.io/repos/pocesar/node-socketexpress/badge.png?branch=develop)](https://coveralls.io/r/pocesar/node-socketexpress?branch=develop)
+[![NPM version](https://badge.fury.io/js/socket-express.png)](http://badge.fury.io/js/socket-express)
 
 [![Dependency Status](https://david-dm.org/pocesar/node-socketexpress.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress)
 [![devDependency Status](https://david-dm.org/pocesar/node-socketexpress/dev-status.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress#info=devDependencies)
+
+[![NPM](https://nodei.co/npm/socket-express.png?downloads=true&stars=true)](https://nodei.co/npm/socket-express/)
 
 Socket Express (SX for short)
 =============
