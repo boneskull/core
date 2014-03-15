@@ -1,11 +1,8 @@
 module.exports = {
   $deps: [
-    {'Q': 'q'}
+    'Utils'
   ]
   $static: {
-    _defer: ->
-      @$.Q.defer()
-
     execute: ->
       throw new Error('RequestCommon class "execute" method must be overriden')
   }

@@ -1,17 +1,17 @@
 module.exports = {
   $singleton: true
   $deps: [
+    'Utils'
     {'parse':['url','parse']}
     {'querystring':'querystring'}
     {'im': ['http','IncomingMessage']}
-    {'Q':'q'}
     {'forms': 'forms'}
     {'formidable': ['formidable','IncomingForm']}
   ]
   parse: (request = null) ->
     form = new @$.formidable()
 
-    d = @$.Q.defer()
+    d = @$.Utils.Promise.defer()
 
     if request?
       form.parse(request, (err, fields, files) ->
@@ -64,7 +64,7 @@ module.exports = {
       throw new Error("Cannot handle type: " + typeof obj)
 
   validate: (request, form) ->
-    d = @$.Q.defer()
+    d = @$.Utils.Promise.defer()
 
     try
       @_handle(form, request, {

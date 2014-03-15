@@ -13,7 +13,8 @@
     "sx":true,
     "fs":true,
     "sinon":true,
-    "expect":true
+    "expect":true,
+    "fixtures":true
   },
   "node"     : true
 }

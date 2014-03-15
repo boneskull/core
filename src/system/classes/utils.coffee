@@ -1,10 +1,11 @@
 module.exports = {
   $singleton: true
   $deps: [
-    {'Q':'q'}
+    {'Promise':'bluebird'}
     {'sprintf': 'sprintf-js'}
     {'_':'lodash'}
     {'g':'getobject'}
+    {'curry':'better-curry'}
   ]
   $setup: ->
     # import all lodash functions
@@ -13,6 +14,12 @@ module.exports = {
     @$implement(
       sprintf: @$.sprintf.sprintf
       vsprintf: @$.sprintf.vsprintf
+    )
+    # Promise
+    @$implement(Promise: @$.Promise, false, true)
+    # curry
+    @$implement(
+      Curry: @$.curry
     )
 
   strReplace: (search, replace, subject) ->
@@ -57,57 +64,6 @@ module.exports = {
         s[i] = temp.split(f[j]).join(repl)
 
     if sa then s else s[0]
-
-  promesifyAll: (source, dest, only = []) ->
-    hasOnly = only.length > 0
-
-    for k,v of source
-      continue if (hasOnly) and (only.indexOf(k) is -1)
-      continue unless @$._.isFunction(v)
-
-      dest[k] = @$.Q.nbind(v, source)
-
-    return
-
-  wrapConditionalPromise: (context, funcName, isReturn = false, baseContext = null) ->
-    return if typeof context[funcName] isnt 'function'
-
-    original = context[funcName]
-
-    defined = original.length # number of arguments, last one is usually the callback
-    Q = @$.Q
-
-    if isReturn is true
-      context[funcName] = ->
-        d = Q.defer()
-
-        try
-          d.resolve(original.apply(context, arguments))
-        catch e
-          d.reject(e)
-
-        d.promise
-
-      return
-
-    # eg: if theres 3 args, and the callback is passed, don't return a promise, but execute the callback
-    context[funcName] = ->
-      args = Array.prototype.slice.call(arguments)
-
-      if args.length is defined
-        # callback is included, act like the original call
-        original.apply(baseContext || context, args)
-      else
-        # return the promise this time
-        d = Q.defer()
-        args.push(d.makeNodeResolver())
-
-        try
-          original.apply(baseContext || context, args)
-        catch e
-          d.reject(e)
-
-        d.promise
 
   noop: ->
 

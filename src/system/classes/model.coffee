@@ -3,8 +3,6 @@ module.exports = {
     'Schema'
     'Utils'
     'Log'
-    {'Q':'q'}
-    {'g':'getobject'}
   ]
   $static: {
     models: {}
@@ -56,10 +54,10 @@ module.exports = {
       definition ?= {}
 
     if @$.Utils.isFunction(definition)
-      d = @$.Q.defer()
-      definition = definition.call(@, d.resolve)
+      d = @$.Utils.Promise.defer()
+      definition = definition.call(@, @$.Utils.Curry.wrap(d.resolve, d))
 
-    @model = @db.define(name, definition)
+    model = @model = @db.define(name, definition)
 
     if @$functions?
       @model::[k] = v for k,v of @$functions
@@ -70,38 +68,23 @@ module.exports = {
       @_applyRelation('hasAndBelongsToMany', name)
 
     if d?
-      d.promise.done((cb) =>
-        cb.call(@, @model)
+      d.promise.done((cb) ->
+        cb.call(@, model)
         d = null
 
         return
       )
 
-      if d.promise.inspect() isnt 'fulfilled'
-        d = null
-
-    # monkey patch jugglingdb to use promises
-    nproto = [
-      'update','create','upsert','updateOrCreate',
-      'findOrCreate','exists','find','all','findOne',
-      'destroyAll','count'
-    ]
-
-    @$.Utils.wrapConditionalPromise(@model, i) for i in nproto
-
-    proto = [
-      'save','destroy','updateAttribute',
-      'updateAttributes','reload'
-    ]
-
-    @$.Utils.wrapConditionalPromise(@model::, i) for i in proto
+    delegated = @$.Utils.Curry.delegate(@, 'model')
 
     for own name,func of @model
-      if (typeof func is 'function')
-        @[name] = ((func, model) ->
-          ->
-            func.apply(model, arguments)
-        )(func, @model)
+      if typeof func is 'function'
+        if func.length is 0
+          delegated.method({name: name, len: -1})
+        else
+          delegated.method(name)
+      else
+        delegated.access(name)
 
     return
 

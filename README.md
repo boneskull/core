@@ -1,41 +1,46 @@
-[![Build Status](https://travis-ci.org/pocesar/node-socketexpress.png?branch=develop)](https://travis-ci.org/pocesar/node-socketexpress) [![Coverage Status](https://coveralls.io/repos/pocesar/node-socketexpress/badge.png?branch=develop)](https://coveralls.io/r/pocesar/node-socketexpress?branch=develop) [![Node dependencies status](https://david-dm.org/pocesar/node-socketexpress/dev-status.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress) [![devDependency Status](https://david-dm.org/pocesar/node-socketexpress/dev-status.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress#info=devDependencies)
+[![Build Status](https://travis-ci.org/pocesar/node-socketexpress.png?branch=develop)](https://travis-ci.org/pocesar/node-socketexpress)
+[![Coverage Status](https://coveralls.io/repos/pocesar/node-socketexpress/badge.png?branch=develop)](https://coveralls.io/r/pocesar/node-socketexpress?branch=develop)
+
+[![Node dependencies status](https://david-dm.org/pocesar/node-socketexpress/dev-status.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress)
+[![devDependency Status](https://david-dm.org/pocesar/node-socketexpress/dev-status.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress#info=devDependencies)
 
 Socket Express (SX for short)
 =============
 
 When realtime and stateless HTTP get together, and live happily ever after.
-HMVC (Hierarchical model–view–controller) framework built on top of [Primus](https://github.com/primus/primus) and
-[Express.js](https://github.com/visionmedia/express) (that might change to [Koa](https://github.com/koajs/koa) in near future when
-generators arrive to node stable) for [Node.js](http://nodejs.org),
-inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone/port for Node for you), using _almost_
+Inspired somehow by the simplicity of PHP Kohana framework (sorry, not another Rails clone/port for Node for you), using _almost_
 nothing more than already existing packages in NPM but with some consistent, maintainable, _cascading "class-based" Javascript_ glue
 together, relying on dependency injection and the D.R.Y. principle, alongside some autoloading magic.
+
+HMVC (Hierarchical model–view–controller) framework built on top of [Primus](https://github.com/primus/primus) and
+[Express.js](https://github.com/visionmedia/express) (that might change to [Koa](https://github.com/koajs/koa) in near future when
+generators arrive to node stable) for [Node.js](http://nodejs.org).
 
 Highlights
 =============
 
-* No DSL
-* No new jargon to learn
+* No DSL and no new jargon to learn, with intuitive naming for system classes, minimizing the need for you to keep coming back to the
+documentation to understand what something does
 * Based on the idea that there's no need to reinvent the wheel, just add the monster truck over them!
 * Focused on convention over configuration
 * Built around the _Repository Pattern_ and _Dependency Injection Pattern_
-* Plain Javascript (or Coffeescript if you fancy that, the source of sx itself is written in Coffeescript)
-* Nothing is enforced, you may only follow folder structure, place the files where they belong, and you are set (but you might as well
-not)
+* Plain Javascript (or Coffeescript if you fancy that, the source of `sx` itself is written in Coffeescript)
+* Nothing is enforced, you may only follow folder structure, place the files where they belong, and you are set (but you might as well not)
+* Flexible enough so you can use many ways to accomplish the same result, depending on your style
 * Everything are _classes_ that you can extend to override behavior or add functionality, but favoring _Object Composition_
 over _Class Inheritance_ in most cases (that means, changing base classes don't change subsequent classes and perform faster)
 using [ES5Class](https://github.com/pocesar/ES5-Class)
 * Many global variables are frowned upon, so there's only one sexy global namespace that rhymes: `sx` that you may or may not use (
-if you are in a hurry, but it's best to use dependency injection)
-* No nested _callback hell_, almost everywhere you can use [Q](https://github.com/kriskowal/q) Promises library
+usually when you are in a hurry, but it's best to use dependency injection and proper structure your project)
+* No nested _callback hell_, almost everywhere you can use Promises (using [Bluebird](https://github.com/petkaantonov/bluebird))
 * Ready for node 0.10+
-* Intuitive naming for system classes, minimizing the need to keep coming back to the documentation to understand what something does
-* Free from _require hell_, using some **magic** through convention and loading mechanisms through automated dependency injection
-* Focused on tests (testing and testability), it's really easy to test, `modules`, `controllers`, `views`, `models`
+* Free from _require hell_, using some **magic** through convention and loading mechanisms using automated dependency injection
+* Focused on tests (testing and testability), it's really easy to test, `modules`, `controllers`, `views`, `models` or any `class` in your project
 * Ready for large scale, well organized applications
 * Most of the system classes are "agnostic" and abstracted and can be used separated from the entire framework
 (as you can see in the tests)
-* Super Performance! The framework won't be your bottleneck, the database and external requests could (but shouldn't)
+* Super performance! The framework won't be your bottleneck, the database and external requests could (but shouldn't)
+* Thought security from the ground up
 
 Install
 =============
@@ -44,7 +49,7 @@ Install
 $ npm install socket-express -g
 ```
 
-Start a new app
+Create a new app
 =============
 
 ```bash
@@ -62,7 +67,7 @@ Inside your app path
 $ sx update
 ```
 
-It will update the Socket Express system folder and dependencies
+It will update the Socket Express system folder and dependencies depending on your global installed version
 
 Classes
 =============
@@ -76,7 +81,7 @@ Coming from Ruby or PHP background?
 =============
 
 Your whole app is loaded when the server is loaded. In Node.js realm, there's no such thing as
-per request compilation + execution (if you are coming from a Rails or PHP framework background).
+per request compilation + execution.
 
 So, every config, every controller, route, view, are loaded on the startup, and the calls are
 directed to their places and are always available through your instance.
@@ -224,57 +229,18 @@ typeof sx.Url.title // function
 ```
 
 Below is an useful example.
-Take it that you don't like using [forms](https://github.com/caolan/forms) module for validation in the `Form` class, for example.
-Instead, you really want to use [validator](https://github.com/chriso/node-validator):
+Say you like Q library for promises better than Bluebird. All you have to do is:
 
 ```js
-// create the file in app/classes/form.js
+// create the file in app/classes/utils.js
 module.exports = {
     $deps: [
-        {'validator': 'validator'} // var validator = require('validator')
+        {'Promise': 'q'} // var Q = require('q')
     ]
-    $setup: function(){
-        // we want to configure validator as per docs
-        var Validator = this.$.validator.Validator;
-
-        Validator.prototype.error = function (msg) {
-            this._errors.push(msg);
-            return this;
-        }
-
-        Validator.prototype.getErrors = function () {
-            return this._errors;
-        }
-    },
-    validate: function(request, rules) {
-        // let's just ignore the original code for create and do our own called sx.Form.validate(req, {rules})
-        // keep it civilized by using promises, will ya?
-
-        // overwrites the original validate, that instead of form, take rules object
-
-        var
-            validator = new this.$.validator.Validator(), errors = [],
-            d = this.$.Q.defer(); // original dependencies are injected to this subclass
-
-        for(var field in rules){
-            // rules is an object comprised of {nameOfField: {ruleType: [args]}}
-            var check = validator.check(request.param(field)); // undefineds will issue an error
-            for (var rule in rules[field]) {
-                // rules[field] is an object comprised of {ruleType: [args], ruleType2: [args]}
-                check[rule].apply(validator, rules[field][rule]);
-            }
-        }
-
-        if (errors = validator.getErrors()) {
-            d.reject({errors: errors, validator: validator});
-        } else {
-            d.resolve(validator);
-        }
-
-        return d.promise;
-    }
 }
 ```
+
+BOOM! You just changed the entire framework to use Q instead. (should work out of the box, since they got compatible APIs)
 
 ##### To create your own helpers and classes
 
@@ -486,12 +452,58 @@ console.log(sx.controller(['Admin','Index'])); // getter that makes it easier to
 Since each module has also their own namespace, they will be available in their respective module:
 
 ```js
-console.log(sx.modules.mymodule.controllers.Index) // index from the module
-console.log(sx.module('mymodule.controllers.Index')); // getter that makes it easier to return a module using an string
-console.log(sx.module(['mymodule','controllers','Index'])); // getter that makes it easier to return a module using an array
+console.log(sx.modules.Mymodule.controllers.Index) // index from the module
+console.log(sx.module('Mymodule.controllers.Index')); // getter that makes it easier to return a module using an string
+console.log(sx.module(['Mymodule','controllers','Index'])); // getter that makes it easier to return a module using an array
 ```
 
 NOTE: Controllers of same name are overwritten (controllers don't extend each other, you must explicitly extend them)
+
+You may return values on your controllers, and they will be sent to the client as-is.
+
+You may return any literals (strings, objects, etc) or you can return promises, that will be sent accordingly when you're done:
+
+```js
+// app/classes/controllers/main.js
+module.exports = {
+  $deps: ['model/User','view/template'],
+  $extend: 'Controller',
+  actionIndex: function(){
+    return 'doh'; // will send a text/plain response
+  },
+  actionPromise: function(){
+    return this.$.model.User.find(1); // will send a application/json response
+  },
+  actionView: function(){
+    return this.$.view.template.render({hello:'world'}); // will send an text/html response
+  }
+};
+```
+
+Failing promises will return a `500`, while `false` will return a `404`
+
+Also, you might ditch oldschool `req` and `res` and use `this` (for preparation for the upcoming of generators and
+a painless migration for [Koa](https://github.com/koajs/koa), if you want future proof code, use this
+way):
+
+```js
+// app/classes/controllers/main.js
+module.exports = {
+  $deps: ['model/User','view/template'],
+  $extend: 'Controller',
+  actionIndex: function(){
+    this.body = 'body';
+  },
+  actionPromise: function(){
+    this.body = this.$.model.User.find(1);
+  },
+  actionView: function(){
+    this.body = this.$.view.template.render({hello:'world'});
+  }
+};
+```
+
+So you have 3 ways of accomplishing the same task in your controllers.
 
 ##### Controllers are reached through Routes (which is covered later on).
 
@@ -764,7 +776,7 @@ module.exports = {
 
 All the routes in your app are named. That means, after you define them, you can look them up by name, and "build" an URI with them.
 
-Inside your 'app/config/routes.js':
+Inside your `app/config/routes.js`:
 
 ```js
 module.exports = {

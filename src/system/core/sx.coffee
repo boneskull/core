@@ -7,16 +7,12 @@ fs = require('fs')
 glob = require('glob')
 _ = require('lodash')
 _s = require('underscore.string')
-postal = require('postal')(_)
 ES5Class = require('es5class')
 getobject = require('getobject')
 
 # Global singleton, the heart of the SX framework
 
 module.exports = ES5Class.$define('sx', {}, ->
-
-    sxChannel = postal.channel 'sx'
-
 
     classes = {}
     configs = {}
@@ -118,24 +114,6 @@ module.exports = ES5Class.$define('sx', {}, ->
         @_toPath(name, 'config')
 
       app: app
-      events:
-        create: postal
-
-        channel: (name) ->
-          postal.channel name
-
-        publish: (event, data) ->
-          sxChannel.publish event, data
-
-        subscribe: (event, cb) ->
-          sxChannel.subscribe event, cb
-
-        unsubscribe: (event) ->
-          subscribers = postal.utils.getSubscribersFor {channel: 'sx', topic: event}
-
-          if subscribers?.length
-            subscriber.unsubscribe() for subscriber in subscribers
-
       factory: Factory(classes, dependencyLoader, @)
       _require: require
       loadConfig: (name, where) ->

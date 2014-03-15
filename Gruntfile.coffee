@@ -21,8 +21,8 @@ module.exports = (grunt) ->
     pkg: grunt.file.readJSON 'package.json'
 
     watch:
-      coffee:
-        files: ['./src/**/*.coffee', './test/**/*.spec.coffee']
+      src:
+        files: ['./src/**/*.coffee', './test/**/*.spec.js']
         tasks: ['build']
 
     mocha_istanbul:
@@ -31,8 +31,12 @@ module.exports = (grunt) ->
         options:
           coverage: true
           quiet: true
+          reporter: 'min'
       coverage:
         src: 'test'
+        options:
+          reporter: 'min'
+
 
     coffee:
       src:
@@ -43,25 +47,14 @@ module.exports = (grunt) ->
         src    : '**/*.coffee'
         dest   : 'lib'
         ext    : '.js'
-      tests:
-        options:
-          bare: true
-        expand : true
-        cwd    : 'test'
-        src    : ['*.coffee']
-        dest   : 'test'
-        ext    : '.spec.js'
-
 
     mochaTest:
       test:
-        src    : ['./test/**/*.spec.coffee']
+        src: ['./test/*.spec.js']
         options:
-          require    : ['coffee-script','./test/common.js']
-          checkLeaks : true
-          colors     : true
-          ui         : 'exports',
-          reporter   : 'list'
+          require: ['./test/common.js']
+          ui: 'exports'
+          reporter: 'list'
 
   grunt.loadNpmTasks 'grunt-release'
   grunt.loadNpmTasks 'grunt-contrib-watch'

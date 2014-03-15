@@ -1,6 +1,6 @@
 module.exports = {
   $deps: [
-    {'jugglingdb': 'jugglingdb'}
+    {'jugglingdb': 'promised-jugglingdb'}
   ]
   $static: {
     schemas: {}

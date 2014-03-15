@@ -1,6 +1,6 @@
 module.exports = {
   $deps: [
-    {'e': ['eventemitter3','EventEmitter']}
+    {'e': ['eventemitter2','EventEmitter2']}
   ]
   $static: {
     $setup: ->

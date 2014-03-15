@@ -3,7 +3,7 @@ module.exports = {
     'Utils'
     {'p': 'path'}
     {'fs': 'fs'}
-    {'c': 'consolidate'}
+    {'c': 'transformers'}
   ]
   $static: {
     views: {}
@@ -20,7 +20,7 @@ module.exports = {
       throw new Error(@$.Utils.sprintf('Invalid view extension "%s"', extension))
 
     @engine = @$.c[extension]
-    @engine.render = @$.Utils.$.Q.nbind(@engine.render, @$.c[extension])
+    @engine.render = @$.Utils.Promise.promisify(@engine.render)
 
     @load((str) =>
       @content = str
