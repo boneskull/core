@@ -1,10 +1,12 @@
-[![Build Status](https://travis-ci.org/pocesar/node-socketexpress.png?branch=develop)](https://travis-ci.org/pocesar/node-socketexpress)
-[![Coverage Status](https://coveralls.io/repos/pocesar/node-socketexpress/badge.png?branch=develop)](https://coveralls.io/r/pocesar/node-socketexpress?branch=develop)
-[![NPM version](https://badge.fury.io/js/socket-express.png)](http://badge.fury.io/js/socket-express)
-[![Dependency Status](https://david-dm.org/pocesar/node-socketexpress.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress)
-[![devDependency Status](https://david-dm.org/pocesar/node-socketexpress/dev-status.png?branch=develop)](https://david-dm.org/pocesar/node-socketexpress#info=devDependencies)
+[![Build Status](https://travis-ci.org/socket-express/core.svg?branch=develop)](https://travis-ci.org/socket-express/core)
+[![Coverage Status](https://coveralls.io/repos/socket-express/core/badge.png)](https://coveralls.io/r/socket-express/core)
+[![NPM version](https://badge.fury.io/js/socket-express.svg)](http://badge.fury.io/js/socket-express)
+[![Dependency Status](https://david-dm.org/socket-express/core.svg)](https://david-dm.org/socket-express/core)
+[![devDependency Status](https://david-dm.org/socket-express/core/dev-status.svg)](https://david-dm.org/socket-express/core#info=devDependencies)
 
 [![NPM](https://nodei.co/npm/socket-express.png?downloads=true&stars=true)](https://nodei.co/npm/socket-express/)
+
+![Socket Express](https://socket-express.github.io/core/media/full-logo.svg "Socket Express")
 
 Socket Express (SX for short)
 =============
@@ -74,7 +76,7 @@ It will update the Socket Express system folder and dependencies depending on yo
 Classes
 =============
 
-Check the [Wiki](https://github.com/pocesar/node-socketexpress/wiki/_pages) for the explanation of each system
+Check the [Wiki](https://github.com/socket-express/core/wiki/_pages) for the explanation of each system
 class that comes with SX
 
 This `README.md` is just an one-page overview of the entire framework.
@@ -1338,4 +1340,4 @@ OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
 ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 OTHER DEALINGS IN THE SOFTWARE.
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/pocesar/node-socketexpress/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/socket-express/core/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
