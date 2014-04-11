@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/socket-express/core.svg?branch=develop)](https://travis-ci.org/socket-express/core)
-[![Coverage Status](https://coveralls.io/repos/socket-express/core/badge.png)](https://coveralls.io/r/socket-express/core)
+[![Build Status](https://travis-ci.org/socket-express/core.svg?branch=master)](https://travis-ci.org/socket-express/core)
+[![Coverage Status](https://coveralls.io/repos/socket-express/core/badge.png?branch=master)](https://coveralls.io/r/socket-express/core)
 [![NPM version](https://badge.fury.io/js/socket-express.svg)](http://badge.fury.io/js/socket-express)
 [![Dependency Status](https://david-dm.org/socket-express/core.svg)](https://david-dm.org/socket-express/core)
 [![devDependency Status](https://david-dm.org/socket-express/core/dev-status.svg)](https://david-dm.org/socket-express/core#info=devDependencies)
