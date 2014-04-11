@@ -6,7 +6,7 @@
 
 [![NPM](https://nodei.co/npm/socket-express.png?downloads=true&stars=true)](https://nodei.co/npm/socket-express/)
 
-![Socket Express](https://socket-express.github.io/core/media/full-logo.svg "Socket Express")
+![Socket Express](https://raw.githubusercontent.com/socket-express/core/master/media/full-logo.svg "Socket Express")
 
 Socket Express (SX for short)
 =============
