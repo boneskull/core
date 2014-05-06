@@ -73,13 +73,10 @@
     "eventemitter2": "*",
     "cache-manager": "0.3.x",
     "better-curry": "*",
-
     "spdy": "*",
     "restify": "*",
     "json-rpc2": "*",
-
     "body-parser": "*",
-
     "swig": "*",
     "atpl": "*",
     "liquor": "*",
@@ -116,7 +113,8 @@
     "coffeecup": "*",
     "templayed": "*",
     "plates": "*",
-    "dot": "*"
+    "dot": "*",
+    "colors": "^0.6.2"
   },
   "peerDependencies": {
     "bower": "*"
